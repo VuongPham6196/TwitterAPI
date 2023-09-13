@@ -4,6 +4,8 @@ import { RegisterReqBody } from '~/models/requests/User.requests'
 import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
 import { TokenType } from '~/constants/enums'
+import { ObjectId } from 'mongodb'
+import RefreshToken from '~/models/schemas/RefreshToken.schema'
 
 class UsersServices {
   private signAccessToken(user_id: string) {
@@ -19,31 +21,29 @@ class UsersServices {
     })
   }
 
+  private signAccessAndRefreshToken(user_id: string) {
+    return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
+  }
+
+  private insertRefeshTokenToDataBase({ user_id, refresh_token }: { user_id: ObjectId; refresh_token: string }) {
+    const refreshToken = new RefreshToken({ user_id, refresh_token })
+    return databaseServices.refreshTokens.insertOne(refreshToken)
+  }
+
   async registerUser(payload: RegisterReqBody) {
     const result = await databaseServices.users.insertOne(
       new User({ ...payload, date_of_birth: new Date(payload.date_of_birth), password: hashPassword(payload.password) })
     )
     const user_id = result.insertedId.toString()
-    const [access_token, refesh_token] = await Promise.all([
-      this.signAccessToken(user_id),
-      this.signRefreshToken(user_id)
-    ])
-    return { access_token, refesh_token }
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    await this.insertRefeshTokenToDataBase({ user_id: result.insertedId, refresh_token })
+    return { access_token, refresh_token }
   }
 
-  async login(payload: { username: string; password: string }) {
-    const { username, password } = payload
-    const result = await databaseServices.users.findOne({ username, password })
-    console.log('result: ', result)
-
-    if (!result) return null
-    const user_id = result._id.toString()
-    const [access_token, refesh_token] = await Promise.all([
-      this.signAccessToken(user_id),
-      this.signRefreshToken(user_id)
-    ])
-
-    return { result, access_token, refesh_token }
+  async login(user_id: ObjectId) {
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id.toString())
+    await this.insertRefeshTokenToDataBase({ user_id, refresh_token })
+    return { access_token, refresh_token }
   }
 
   async checkEmailExist(email: string) {
