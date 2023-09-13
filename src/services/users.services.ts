@@ -6,7 +6,8 @@ import { signToken } from '~/utils/jwt'
 import { TokenType } from '~/constants/enums'
 import { ObjectId } from 'mongodb'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
-
+import { config } from 'dotenv'
+config()
 class UsersServices {
   private signAccessToken(user_id: string) {
     return signToken({

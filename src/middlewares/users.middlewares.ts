@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { checkSchema } from 'express-validator'
+import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/schemas/Errors'
 import databaseServices from '~/services/database.services'
@@ -61,7 +62,7 @@ export const registerValidator = validate(
         options: async (value) => {
           const isExist = await usersServices.checkEmailExist(value)
           if (isExist) {
-            throw new ErrorWithStatus({ message: USER_MESSAGES.EMAIL_ALREADY_EXISTS, status: 401 })
+            throw new ErrorWithStatus({ message: USER_MESSAGES.EMAIL_ALREADY_EXISTS, status: HTTP_STATUS.UNAUTHORIZED })
           }
           return true
         }
