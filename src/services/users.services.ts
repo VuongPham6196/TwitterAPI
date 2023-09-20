@@ -7,6 +7,7 @@ import { TokenType } from '~/constants/enums'
 import { ObjectId } from 'mongodb'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { config } from 'dotenv'
+import { USER_MESSAGES } from '~/constants/messages'
 config()
 class UsersServices {
   private signAccessToken(user_id: string) {
@@ -50,6 +51,11 @@ class UsersServices {
   async checkEmailExist(email: string) {
     const result = await databaseServices.users.findOne({ email: email })
     return Boolean(result)
+  }
+
+  async logout(refresh_token: string) {
+    await databaseServices.refreshTokens.deleteOne({ refresh_token: refresh_token })
+    return { message: USER_MESSAGES.LOGOUT_SUCCESSFUL }
   }
 }
 const usersServices = new UsersServices()

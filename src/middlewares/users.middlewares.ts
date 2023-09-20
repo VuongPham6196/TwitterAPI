@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { checkExact, checkSchema } from 'express-validator'
+import { JsonWebTokenError } from 'jsonwebtoken'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/schemas/Errors'
@@ -123,7 +124,7 @@ export const registerValidator = validate(
   )
 )
 
-export const logoutValidator = validate(
+export const accessTokenValidator = validate(
   checkSchema(
     {
       Authorization: {
@@ -137,12 +138,48 @@ export const logoutValidator = validate(
               })
             }
             const result = await verifyToken({ token })
-            req.decoded_authorization = result
+            ;(req as Request).decoded_authorization = result
             return true
           }
         }
       }
     },
     ['headers']
+  )
+)
+
+export const refreshTokenValidator = validate(
+  checkSchema(
+    {
+      refresh_token: {
+        notEmpty: { errorMessage: USER_MESSAGES.REFRESH_TOKEN_IS_REQUIRED },
+        custom: {
+          options: async (value, { req }) => {
+            try {
+              const [refresh_token, decoded_refresh_token] = await Promise.all([
+                databaseServices.refreshTokens.findOne({ refresh_token: value }),
+                verifyToken({ token: value })
+              ])
+              if (!refresh_token) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.REFRESH_TOKEN_IS_NOT_EXIST,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              ;(req as Request).decoded_refresh_token = decoded_refresh_token
+            } catch (error) {
+              if (error instanceof JsonWebTokenError) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.REFRESH_TOKEN_IS_INVALID,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+              throw error
+            }
+          }
+        }
+      }
+    },
+    ['body']
   )
 )

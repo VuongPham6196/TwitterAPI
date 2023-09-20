@@ -1,7 +1,12 @@
 import { Router } from 'express'
 import { USER_MESSAGES } from '~/constants/messages'
-import { loginController, registerController } from '~/controllers/users.controller'
-import { loginValidator, logoutValidator, registerValidator } from '~/middlewares/users.middlewares'
+import { loginController, logoutController, registerController } from '~/controllers/users.controller'
+import {
+  loginValidator,
+  accessTokenValidator,
+  refreshTokenValidator,
+  registerValidator
+} from '~/middlewares/users.middlewares'
 import { WrapAsync } from '~/utils/handlers'
 import { validate } from '~/utils/validation'
 
@@ -30,8 +35,6 @@ usersRouter.post('/register', registerValidator, WrapAsync(registerController))
  * Method: POST
  * Body: {accessToken: string}
  */
-usersRouter.post('/logout', logoutValidator, (req, res, next) => {
-  res.json({ message: USER_MESSAGES.LOGOUT_SUCCESSFUL })
-})
+usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, WrapAsync(logoutController))
 
 export default usersRouter

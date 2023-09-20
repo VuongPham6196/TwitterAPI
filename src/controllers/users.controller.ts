@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { RegisterReqBody } from '~/models/requests/User.requests'
+import { LogoutReqBody, RegisterReqBody } from '~/models/requests/User.requests'
 import { ParamsDictionary } from 'express-serve-static-core'
 import usersServices from '~/services/users.services'
 import { USER_MESSAGES } from '~/constants/messages'
@@ -25,4 +25,13 @@ export const registerController = async (
 ) => {
   const result = await usersServices.registerUser(req.body)
   res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.REGISTER_SUCCESSFUL, result })
+}
+
+export const logoutController = async (
+  req: Request<ParamsDictionary, any, LogoutReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const result = await usersServices.logout(req.body.refresh_token)
+  res.status(HTTP_STATUS.OK).json(result)
 }

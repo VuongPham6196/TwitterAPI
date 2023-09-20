@@ -1,5 +1,6 @@
 import { config } from 'dotenv'
 import jwt from 'jsonwebtoken'
+import { TokenPayload } from '~/models/requests/User.requests'
 config()
 
 export const signToken = ({
@@ -28,10 +29,10 @@ export const verifyToken = ({
   publicKey?: string
   options?: jwt.VerifyOptions
 }) => {
-  return new Promise<string | object>((res, rej) =>
+  return new Promise<TokenPayload>((res, rej) =>
     jwt.verify(token, publicKey, options, (err, decoded) => {
       if (err) throw rej(err)
-      res(decoded as string | object)
+      res(decoded as TokenPayload)
     })
   )
 }
