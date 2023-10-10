@@ -1,11 +1,24 @@
 import { Router } from 'express'
 import { USER_MESSAGES } from '~/constants/messages'
-import { loginController, logoutController, registerController } from '~/controllers/users.controller'
+import {
+  forgotPasswordController,
+  loginController,
+  logoutController,
+  registerController,
+  resendVerifyEmailController,
+  resetPasswordController,
+  verifyEmailController,
+  verifyForgotPasswordController
+} from '~/controllers/users.controller'
 import {
   loginValidator,
   accessTokenValidator,
   refreshTokenValidator,
-  registerValidator
+  registerValidator,
+  verifyEmailTokenValidator,
+  forgotPasswordValidator,
+  verifiedForgotPasswordTokenValidator,
+  resetPasswordTokenValidator
 } from '~/middlewares/users.middlewares'
 import { WrapAsync } from '~/utils/handlers'
 import { validate } from '~/utils/validation'
@@ -36,5 +49,49 @@ usersRouter.post('/register', registerValidator, WrapAsync(registerController))
  * Body: {accessToken: string}
  */
 usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, WrapAsync(logoutController))
+
+/**
+ * Description: Verify email token
+ * Path: /verify-email
+ * Method: POST
+ * Body: {verifyEmailToken: string}
+ */
+usersRouter.post('/verify-email', verifyEmailTokenValidator, WrapAsync(verifyEmailController))
+
+/**
+ * Description: Verify email token
+ * Path: /verify-email
+ * Method: POST
+ * Body: {verifyEmailToken: string}
+ */
+usersRouter.post('/resend-verify-email', accessTokenValidator, WrapAsync(resendVerifyEmailController))
+
+/**
+ * Description: Forgot password
+ * Path: /forgot-password
+ * Method: POST
+ * Body: {email: string}
+ */
+usersRouter.post('/forgot-password', forgotPasswordValidator, WrapAsync(forgotPasswordController))
+
+/**
+ * Description: Verify Forgot Password
+ * Path: /verify-forgot-password
+ * Method: POST
+ * Body: {token: string}
+ */
+usersRouter.post(
+  '/verify-forgot-password',
+  verifiedForgotPasswordTokenValidator,
+  WrapAsync(verifyForgotPasswordController)
+)
+
+/**
+ * Description: Verify Forgot Password
+ * Path: /verify-forgot-password
+ * Method: POST
+ * Body: {token: string, password: string, confirmPassword: string}
+ */
+usersRouter.post('/reset-password', resetPasswordTokenValidator, WrapAsync(resetPasswordController))
 
 export default usersRouter

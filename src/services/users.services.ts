@@ -1,9 +1,9 @@
 import User from '~/models/schemas/User.schema'
 import databaseServices from './database.services'
-import { RegisterReqBody } from '~/models/requests/User.requests'
+import { RegisterReqBody, TokenPayload } from '~/models/requests/User.requests'
 import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
-import { TokenType } from '~/constants/enums'
+import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import { ObjectId } from 'mongodb'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { config } from 'dotenv'
@@ -13,13 +13,30 @@ class UsersServices {
   private signAccessToken(user_id: string) {
     return signToken({
       payload: { user_id, token_type: TokenType.AccessToken },
+      privateKey: process.env.JWT_ACCESS_TOKEN_SECRET as string,
       options: { expiresIn: process.env.ACCESS_TOKEN_LIFE }
     })
   }
   private signRefreshToken(user_id: string) {
     return signToken({
       payload: { user_id, token_type: TokenType.RefreshToken },
+      privateKey: process.env.JWT_REFRESH_TOKEN_SECRET as string,
       options: { expiresIn: process.env.REFRESH_TOKEN_LIFE }
+    })
+  }
+  private signVerifyEmailToken(user_id: string) {
+    return signToken({
+      payload: { user_id, token_type: TokenType.EmailVerifyToken },
+      privateKey: process.env.JWT_VERIFY_EMAIL_TOKEN_SECRET as string,
+      options: { expiresIn: process.env.VERIFY_EMAIL_TOKEN_LIFE }
+    })
+  }
+
+  private signForgotPasswordToken(user_id: string) {
+    return signToken({
+      payload: { user_id, token_type: TokenType.ForgotPasswordToken },
+      privateKey: process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET as string,
+      options: { expiresIn: process.env.FORGOT_PASSWORD_TOKEN_LIFE }
     })
   }
 
@@ -37,9 +54,12 @@ class UsersServices {
       new User({ ...payload, date_of_birth: new Date(payload.date_of_birth), password: hashPassword(payload.password) })
     )
     const user_id = result.insertedId.toString()
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
-    await this.insertRefeshTokenToDataBase({ user_id: result.insertedId, refresh_token })
-    return { access_token, refresh_token }
+    const verify_email_token = await this.signVerifyEmailToken(user_id)
+    await databaseServices.users.updateOne(
+      { _id: result.insertedId },
+      { $set: { email_verify_token: verify_email_token } }
+    )
+    return { verify_email_token }
   }
 
   async login(user_id: ObjectId) {
@@ -48,14 +68,66 @@ class UsersServices {
     return { access_token, refresh_token }
   }
 
+  async logout(refresh_token: string) {
+    await databaseServices.refreshTokens.deleteOne({ refresh_token: refresh_token })
+    return { message: USER_MESSAGES.LOGOUT_SUCCESSFUL }
+  }
+
   async checkEmailExist(email: string) {
     const result = await databaseServices.users.findOne({ email: email })
     return Boolean(result)
   }
 
-  async logout(refresh_token: string) {
-    await databaseServices.refreshTokens.deleteOne({ refresh_token: refresh_token })
-    return { message: USER_MESSAGES.LOGOUT_SUCCESSFUL }
+  async verifyEmail(user_id: ObjectId) {
+    await databaseServices.users.updateOne({ _id: user_id }, [
+      { $set: { verify: UserVerifyStatus.Verified, email_verify_token: '', updated_at: '$$NOW' } }
+    ])
+    return this.login(user_id)
+  }
+
+  async resendVerifyEmail(user_id: ObjectId) {
+    const verify_email_token = await this.signVerifyEmailToken(user_id.toString())
+    await databaseServices.users.updateOne(
+      { _id: user_id },
+      {
+        $set: { email_verify_token: verify_email_token },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+    return { verify_email_token }
+  }
+
+  async forgotPassword(user_id: string) {
+    const forgot_password_token = await this.signForgotPasswordToken(user_id)
+    await databaseServices.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: { forgot_password_token: forgot_password_token },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+    console.log(
+      "Send email to user's email + forgot_password_token:",
+      `https://twitter.com/verify-forgot-passowrd?forgot-passowrd-token=${forgot_password_token}`
+    )
+    return { forgot_password_token }
+  }
+
+  async resetPassword(user_id: string, password: string) {
+    await databaseServices.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: { password: hashPassword(password), forgot_password_token: '' },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+    return { message: USER_MESSAGES.RESET_PASSWORD_SUCCESSFUL }
   }
 }
 const usersServices = new UsersServices()

@@ -1,39 +1,33 @@
 import { NextFunction, Request, Response } from 'express'
 import { checkExact, checkSchema } from 'express-validator'
 import { JsonWebTokenError } from 'jsonwebtoken'
+import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/schemas/Errors'
 import databaseServices from '~/services/database.services'
-import usersServices from '~/services/users.services'
-import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import { validate } from '~/utils/validation'
+import {
+  AuthorizationSchema,
+  ConfirmPasswordSchema,
+  ForgotPasswordEmailSchema,
+  ForgotPasswordTokenSchema,
+  LoginPasswordSchema,
+  LoginUsernameSchema,
+  RefreshTokenSchema,
+  RegisterDateOfBirthSchema,
+  RegisterEmailSchema,
+  PasswordSchema,
+  RegisterUsernameSchema,
+  VerifyEmailTokenSchema
+} from './schemas'
 
 export const loginValidator = validate(
   checkSchema(
     {
-      email: {
-        isEmail: {
-          errorMessage: USER_MESSAGES.EMAIL_MUST_BE_VALID
-        },
-        trim: true,
-        custom: {
-          options: async (value, { req }) => {
-            const password = req.body.password
-            const user = await databaseServices.users.findOne({ email: value, password: hashPassword(password) })
-            if (!user) {
-              throw new Error(USER_MESSAGES.EMAIL_OR_PASSWORD_INCORRECT)
-            }
-            req.user = user
-            return true
-          }
-        }
-      },
-      password: {
-        notEmpty: { errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED },
-        trim: true
-      }
+      email: LoginUsernameSchema,
+      password: LoginPasswordSchema
     },
     ['body']
   )
@@ -42,83 +36,11 @@ export const loginValidator = validate(
 export const registerValidator = validate(
   checkSchema(
     {
-      username: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.USERNAME_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: USER_MESSAGES.USERNAME_MUST_BE_STRING
-        },
-        isLength: {
-          options: {
-            min: 1,
-            max: 100
-          },
-          errorMessage: USER_MESSAGES.USERNAME_MUST_BE_FROM_1_TO_100_CHARACTERS
-        },
-        trim: true
-      },
-      email: {
-        notEmpty: { errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED },
-        isEmail: {
-          errorMessage: USER_MESSAGES.EMAIL_MUST_BE_VALID
-        },
-        trim: true,
-        custom: {
-          options: async (value) => {
-            const isExist = await usersServices.checkEmailExist(value)
-            if (isExist) {
-              throw new ErrorWithStatus({
-                message: USER_MESSAGES.EMAIL_ALREADY_EXISTS,
-                status: HTTP_STATUS.UNAUTHORIZED
-              })
-            }
-            return true
-          }
-        }
-      },
-      password: {
-        notEmpty: { errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED },
-        isString: { errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING },
-        isLength: {
-          options: {
-            min: 6,
-            max: 50
-          },
-          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_FROM_6_TO_50_CHARACTERS
-        },
-        trim: true,
-        isStrongPassword: {
-          options: { minLength: 6, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 },
-          errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRONG
-        }
-      },
-      confirm_password: {
-        notEmpty: { errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED },
-        isString: { errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_MUST_BE_STRING },
-        isLength: {
-          options: {
-            min: 6,
-            max: 50
-          },
-          errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_MUST_BE_FROM_6_TO_50_CHARACTERS
-        },
-        trim: true,
-        custom: {
-          options: (value, { req }) => {
-            if (value !== req.body.password) {
-              throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
-            }
-            return true
-          }
-        }
-      },
-      date_of_birth: {
-        isISO8601: {
-          options: { strict: true, strictSeparator: true },
-          errorMessage: USER_MESSAGES.DATE_OF_BIRTH_MUST_BE_ISO_8601
-        }
-      }
+      username: RegisterUsernameSchema,
+      email: RegisterEmailSchema,
+      password: PasswordSchema,
+      confirm_password: ConfirmPasswordSchema,
+      date_of_birth: RegisterDateOfBirthSchema
     },
     ['body']
   )
@@ -127,22 +49,7 @@ export const registerValidator = validate(
 export const accessTokenValidator = validate(
   checkSchema(
     {
-      Authorization: {
-        custom: {
-          options: async (value, { req }) => {
-            const token = value.split(' ')[1]
-            if (!token) {
-              throw new ErrorWithStatus({
-                message: USER_MESSAGES.ACCESS_TOKEN_IS_INVALID,
-                status: HTTP_STATUS.UNAUTHORIZED
-              })
-            }
-            const result = await verifyToken({ token })
-            ;(req as Request).decoded_authorization = result
-            return true
-          }
-        }
-      }
+      Authorization: AuthorizationSchema
     },
     ['headers']
   )
@@ -151,34 +58,45 @@ export const accessTokenValidator = validate(
 export const refreshTokenValidator = validate(
   checkSchema(
     {
-      refresh_token: {
-        notEmpty: { errorMessage: USER_MESSAGES.REFRESH_TOKEN_IS_REQUIRED },
-        custom: {
-          options: async (value, { req }) => {
-            try {
-              const [refresh_token, decoded_refresh_token] = await Promise.all([
-                databaseServices.refreshTokens.findOne({ refresh_token: value }),
-                verifyToken({ token: value })
-              ])
-              if (!refresh_token) {
-                throw new ErrorWithStatus({
-                  message: USER_MESSAGES.REFRESH_TOKEN_IS_NOT_EXIST,
-                  status: HTTP_STATUS.UNAUTHORIZED
-                })
-              }
-              ;(req as Request).decoded_refresh_token = decoded_refresh_token
-            } catch (error) {
-              if (error instanceof JsonWebTokenError) {
-                throw new ErrorWithStatus({
-                  message: USER_MESSAGES.REFRESH_TOKEN_IS_INVALID,
-                  status: HTTP_STATUS.UNAUTHORIZED
-                })
-              }
-              throw error
-            }
-          }
-        }
-      }
+      refresh_token: RefreshTokenSchema
+    },
+    ['body']
+  )
+)
+
+export const verifyEmailTokenValidator = validate(
+  checkSchema(
+    {
+      verify_email_token: VerifyEmailTokenSchema
+    },
+    ['body']
+  )
+)
+
+export const forgotPasswordValidator = validate(
+  checkSchema(
+    {
+      email: ForgotPasswordEmailSchema
+    },
+    ['body']
+  )
+)
+
+export const verifiedForgotPasswordTokenValidator = validate(
+  checkSchema(
+    {
+      forgot_password_token: ForgotPasswordTokenSchema
+    },
+    ['body']
+  )
+)
+
+export const resetPasswordTokenValidator = validate(
+  checkSchema(
+    {
+      forgot_password_token: ForgotPasswordTokenSchema,
+      password: PasswordSchema,
+      confirm_password: ConfirmPasswordSchema
     },
     ['body']
   )
