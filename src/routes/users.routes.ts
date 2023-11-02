@@ -1,12 +1,13 @@
 import { Router } from 'express'
-import { USER_MESSAGES } from '~/constants/messages'
 import {
   forgotPasswordController,
+  getMeController,
   loginController,
   logoutController,
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
+  updateMeController,
   verifyEmailController,
   verifyForgotPasswordController
 } from '~/controllers/users.controller'
@@ -18,10 +19,11 @@ import {
   verifyEmailTokenValidator,
   forgotPasswordValidator,
   verifiedForgotPasswordTokenValidator,
-  resetPasswordTokenValidator
+  resetPasswordTokenValidator,
+  verifiedUserValidator,
+  updateMeValidator
 } from '~/middlewares/users.middlewares'
 import { WrapAsync } from '~/utils/handlers'
-import { validate } from '~/utils/validation'
 
 const usersRouter = Router()
 
@@ -87,11 +89,32 @@ usersRouter.post(
 )
 
 /**
- * Description: Verify Forgot Password
- * Path: /verify-forgot-password
+ * Description: Reset Password
+ * Path: /reset-password
  * Method: POST
  * Body: {token: string, password: string, confirmPassword: string}
  */
 usersRouter.post('/reset-password', resetPasswordTokenValidator, WrapAsync(resetPasswordController))
+
+/**
+ * Description: Get Me
+ * Path: /get-me
+ * Method: GET
+ */
+usersRouter.get('/get-me', accessTokenValidator, WrapAsync(getMeController))
+
+/**
+ * Description: Update Me
+ * Path: /update-me
+ * Method: PATCH
+ * Body: {name: string, bio: string, location: string, website: string, avatar: string, cover_photo: string}
+ */
+usersRouter.patch(
+  '/update-me',
+  accessTokenValidator,
+  verifiedUserValidator,
+  updateMeValidator,
+  WrapAsync(updateMeController)
+)
 
 export default usersRouter

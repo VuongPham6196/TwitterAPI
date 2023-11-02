@@ -10,7 +10,6 @@ import usersServices from '~/services/users.services'
 import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 
-//Auth
 export const AuthorizationSchema: ParamSchema = {
   custom: {
     options: async (value, { req }) => {
@@ -111,8 +110,7 @@ export const VerifyEmailTokenSchema: ParamSchema = {
   }
 }
 
-//Login
-export const LoginUsernameSchema: ParamSchema = {
+export const LoginEmailSchema: ParamSchema = {
   isEmail: {
     errorMessage: USER_MESSAGES.EMAIL_MUST_BE_VALID
   },
@@ -136,7 +134,6 @@ export const LoginPasswordSchema: ParamSchema = {
   trim: true
 }
 
-//Register and reset password
 export const RegisterEmailSchema: ParamSchema = {
   notEmpty: { errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED },
   isEmail: {
@@ -157,7 +154,7 @@ export const RegisterEmailSchema: ParamSchema = {
   }
 }
 
-export const RegisterUsernameSchema: ParamSchema = {
+export const UsernameSchema: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.USERNAME_IS_REQUIRED
   },
@@ -212,14 +209,13 @@ export const ConfirmPasswordSchema: ParamSchema = {
   }
 }
 
-export const RegisterDateOfBirthSchema: ParamSchema = {
+export const DateOfBirthSchema: ParamSchema = {
   isISO8601: {
     options: { strict: true, strictSeparator: true },
     errorMessage: USER_MESSAGES.DATE_OF_BIRTH_MUST_BE_ISO_8601
   }
 }
 
-//forgot password
 export const ForgotPasswordEmailSchema: ParamSchema = {
   notEmpty: { errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED },
   isEmail: {
@@ -286,4 +282,39 @@ export const ForgotPasswordTokenSchema: ParamSchema = {
       }
     }
   }
+}
+
+type generalStringSchema = {
+  fieldName?: string
+  required?: boolean
+  minLength?: number
+  maxLength?: number
+}
+
+export const generalStringSchema = ({
+  fieldName = 'Field',
+  required = false,
+  minLength = 0,
+  maxLength = 100
+}: generalStringSchema): ParamSchema => {
+  const schema: ParamSchema = {
+    optional: !required,
+    isString: {
+      errorMessage: `${fieldName} must be string!`
+    },
+    notEmpty: required
+      ? {
+          errorMessage: `${fieldName} is required!`
+        }
+      : undefined,
+    isLength: {
+      options: {
+        min: minLength,
+        max: maxLength
+      },
+      errorMessage: `${fieldName} must be from ${minLength} to ${maxLength} characters!`
+    },
+    trim: true
+  }
+  return schema
 }

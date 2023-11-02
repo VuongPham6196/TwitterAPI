@@ -14,19 +14,23 @@ import {
   ForgotPasswordEmailSchema,
   ForgotPasswordTokenSchema,
   LoginPasswordSchema,
-  LoginUsernameSchema,
+  LoginEmailSchema,
   RefreshTokenSchema,
-  RegisterDateOfBirthSchema,
+  DateOfBirthSchema,
   RegisterEmailSchema,
   PasswordSchema,
-  RegisterUsernameSchema,
-  VerifyEmailTokenSchema
+  UsernameSchema,
+  VerifyEmailTokenSchema,
+  generalStringSchema
 } from './schemas'
+import User from '~/models/schemas/User.schema'
+import { UserVerifyStatus } from '~/constants/enums'
+import { TokenPayload } from '~/models/requests/User.requests'
 
 export const loginValidator = validate(
   checkSchema(
     {
-      email: LoginUsernameSchema,
+      email: LoginEmailSchema,
       password: LoginPasswordSchema
     },
     ['body']
@@ -36,11 +40,11 @@ export const loginValidator = validate(
 export const registerValidator = validate(
   checkSchema(
     {
-      username: RegisterUsernameSchema,
+      username: UsernameSchema,
       email: RegisterEmailSchema,
       password: PasswordSchema,
       confirm_password: ConfirmPasswordSchema,
-      date_of_birth: RegisterDateOfBirthSchema
+      date_of_birth: DateOfBirthSchema
     },
     ['body']
   )
@@ -97,6 +101,29 @@ export const resetPasswordTokenValidator = validate(
       forgot_password_token: ForgotPasswordTokenSchema,
       password: PasswordSchema,
       confirm_password: ConfirmPasswordSchema
+    },
+    ['body']
+  )
+)
+
+export const verifiedUserValidator = async (req: Request, res: Response, next: NextFunction) => {
+  const { verify } = req.decoded_authorization as TokenPayload
+  if (verify !== UserVerifyStatus.Verified) {
+    return next(new ErrorWithStatus({ message: USER_MESSAGES.USER_NOT_VERIFIED, status: HTTP_STATUS.FORBIDDEN }))
+  }
+  next()
+}
+
+export const updateMeValidator = validate(
+  checkSchema(
+    {
+      name: generalStringSchema({ fieldName: 'name' }),
+      bio: generalStringSchema({ fieldName: 'bio' }),
+      location: generalStringSchema({ fieldName: 'location' }),
+      website: generalStringSchema({ fieldName: 'website' }),
+      avatar: generalStringSchema({ fieldName: 'avatar', maxLength: 300 }),
+      cover_photo: generalStringSchema({ fieldName: 'cover phote url', maxLength: 300 }),
+      date_of_birth: { ...DateOfBirthSchema, optional: true }
     },
     ['body']
   )

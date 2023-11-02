@@ -5,8 +5,9 @@ import {
   RegisterReqBody,
   TokenPayload,
   VerifyEmailReqBody,
-  resetPasswordReqBody,
-  verifyForgotPassowrdReqBody
+  ResetPasswordReqBody,
+  VerifyForgotPassowrdReqBody,
+  UpdateMeReqBody
 } from '~/models/requests/User.requests'
 import { ParamsDictionary } from 'express-serve-static-core'
 import usersServices from '~/services/users.services'
@@ -21,7 +22,7 @@ export const loginController = async (req: Request, res: Response, next: NextFun
   const user = req.user as User
   const _id = user._id as ObjectId
 
-  const result = await usersServices.login(_id)
+  const result = await usersServices.login({ user_id: _id.toString(), verify: user.verify })
 
   if (!result) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.LOGIN_FAILED })
@@ -62,8 +63,8 @@ export const verifyEmailController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const _id = new ObjectId(req.decoded_verify_email_token?.user_id)
-  const user = await databaseServices.users.findOne({ _id: _id })
+  const user_id = req.decoded_verify_email_token?.user_id as string
+  const user = await databaseServices.users.findOne({ _id: new ObjectId(user_id) })
 
   if (!user) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.USERT_NOT_FOUND })
@@ -77,13 +78,13 @@ export const verifyEmailController = async (
     return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.ACCOUNT_BANNED })
   }
 
-  const result = await usersServices.verifyEmail(_id)
+  const result = await usersServices.verifyEmail({ user_id, verify: UserVerifyStatus.Verified })
   res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.VERIFY_EMAIL_SUCCESSFUL, result })
 }
 
 export const resendVerifyEmailController = async (req: Request, res: Response, next: NextFunction) => {
-  const user_id = new ObjectId(req.decoded_authorization?.user_id)
-  const user = await databaseServices.users.findOne({ _id: user_id })
+  const user_id = req.decoded_authorization?.user_id as string
+  const user = await databaseServices.users.findOne({ _id: new ObjectId(user_id) })
 
   if (!user) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.USERT_NOT_FOUND })
@@ -91,7 +92,7 @@ export const resendVerifyEmailController = async (req: Request, res: Response, n
   if (user.verify === UserVerifyStatus.Verified) {
     return res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.ALREADY_VERIFIED_EMAIL_BEFORE })
   }
-  const result = await usersServices.resendVerifyEmail(user_id)
+  const result = await usersServices.resendVerifyEmail({ user_id, verify: UserVerifyStatus.Unverified })
   return res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESSFUL, result: result })
 }
 
@@ -100,13 +101,13 @@ export const forgotPasswordController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { _id } = req.user as User
-  await usersServices.forgotPassword((_id as ObjectId).toString())
+  const { _id, verify } = req.user as User
+  await usersServices.forgotPassword({ user_id: (_id as ObjectId).toString(), verify })
   res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD })
 }
 
 export const verifyForgotPasswordController = async (
-  req: Request<ParamsDictionary, any, verifyForgotPassowrdReqBody>,
+  req: Request<ParamsDictionary, any, VerifyForgotPassowrdReqBody>,
   res: Response,
   next: NextFunction
 ) => {
@@ -118,7 +119,7 @@ export const verifyForgotPasswordController = async (
 }
 
 export const resetPasswordController = async (
-  req: Request<ParamsDictionary, any, resetPasswordReqBody>,
+  req: Request<ParamsDictionary, any, ResetPasswordReqBody>,
   res: Response,
   next: NextFunction
 ) => {
@@ -126,4 +127,30 @@ export const resetPasswordController = async (
 
   const result = await usersServices.resetPassword(user_id, req.body.password)
   res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const getMeController = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+
+  const result = await usersServices.getMe(user_id)
+
+  res.status(HTTP_STATUS.OK).json({
+    message: USER_MESSAGES.GET_ME_SUCCESSFUL,
+    result
+  })
+}
+
+export const updateMeController = async (
+  req: Request<ParamsDictionary, any, UpdateMeReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+
+  const result = await usersServices.updateMe(user_id, req.body)
+
+  res.status(HTTP_STATUS.OK).json({
+    message: USER_MESSAGES.UPDATE_ME_SUCCESSFUL,
+    result
+  })
 }

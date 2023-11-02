@@ -1,6 +1,6 @@
 import User from '~/models/schemas/User.schema'
 import databaseServices from './database.services'
-import { RegisterReqBody, TokenPayload } from '~/models/requests/User.requests'
+import { RegisterReqBody, TokenPayload, UpdateMeReqBody } from '~/models/requests/User.requests'
 import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
@@ -9,43 +9,54 @@ import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { config } from 'dotenv'
 import { USER_MESSAGES } from '~/constants/messages'
 config()
+
+interface signTokenProps {
+  user_id: string
+  verify: UserVerifyStatus
+}
+
+interface InsertRefeshTokenToDataBaseProps {
+  user_id: string
+  refresh_token: string
+}
+
 class UsersServices {
-  private signAccessToken(user_id: string) {
+  private signAccessToken({ user_id, verify }: signTokenProps) {
     return signToken({
-      payload: { user_id, token_type: TokenType.AccessToken },
+      payload: { user_id, token_type: TokenType.AccessToken, verify },
       privateKey: process.env.JWT_ACCESS_TOKEN_SECRET as string,
       options: { expiresIn: process.env.ACCESS_TOKEN_LIFE }
     })
   }
-  private signRefreshToken(user_id: string) {
+  private signRefreshToken({ user_id, verify }: signTokenProps) {
     return signToken({
-      payload: { user_id, token_type: TokenType.RefreshToken },
+      payload: { user_id, token_type: TokenType.RefreshToken, verify },
       privateKey: process.env.JWT_REFRESH_TOKEN_SECRET as string,
       options: { expiresIn: process.env.REFRESH_TOKEN_LIFE }
     })
   }
-  private signVerifyEmailToken(user_id: string) {
+  private signVerifyEmailToken({ user_id, verify }: signTokenProps) {
     return signToken({
-      payload: { user_id, token_type: TokenType.EmailVerifyToken },
+      payload: { user_id, token_type: TokenType.EmailVerifyToken, verify },
       privateKey: process.env.JWT_VERIFY_EMAIL_TOKEN_SECRET as string,
       options: { expiresIn: process.env.VERIFY_EMAIL_TOKEN_LIFE }
     })
   }
 
-  private signForgotPasswordToken(user_id: string) {
+  private signForgotPasswordToken({ user_id, verify }: signTokenProps) {
     return signToken({
-      payload: { user_id, token_type: TokenType.ForgotPasswordToken },
+      payload: { user_id, token_type: TokenType.ForgotPasswordToken, verify },
       privateKey: process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET as string,
       options: { expiresIn: process.env.FORGOT_PASSWORD_TOKEN_LIFE }
     })
   }
 
-  private signAccessAndRefreshToken(user_id: string) {
-    return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
+  private signAccessAndRefreshToken({ user_id, verify }: signTokenProps) {
+    return Promise.all([this.signAccessToken({ user_id, verify }), this.signRefreshToken({ user_id, verify })])
   }
 
-  private insertRefeshTokenToDataBase({ user_id, refresh_token }: { user_id: ObjectId; refresh_token: string }) {
-    const refreshToken = new RefreshToken({ user_id, refresh_token })
+  private insertRefeshTokenToDataBase({ user_id, refresh_token }: InsertRefeshTokenToDataBaseProps) {
+    const refreshToken = new RefreshToken({ user_id: new ObjectId(user_id), refresh_token })
     return databaseServices.refreshTokens.insertOne(refreshToken)
   }
 
@@ -54,7 +65,7 @@ class UsersServices {
       new User({ ...payload, date_of_birth: new Date(payload.date_of_birth), password: hashPassword(payload.password) })
     )
     const user_id = result.insertedId.toString()
-    const verify_email_token = await this.signVerifyEmailToken(user_id)
+    const verify_email_token = await this.signVerifyEmailToken({ user_id, verify: UserVerifyStatus.Unverified })
     await databaseServices.users.updateOne(
       { _id: result.insertedId },
       { $set: { email_verify_token: verify_email_token } }
@@ -62,9 +73,12 @@ class UsersServices {
     return { verify_email_token }
   }
 
-  async login(user_id: ObjectId) {
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id.toString())
-    await this.insertRefeshTokenToDataBase({ user_id, refresh_token })
+  async login({ user_id, verify }: signTokenProps) {
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
+      user_id: user_id.toString(),
+      verify
+    })
+    await this.insertRefeshTokenToDataBase({ user_id: user_id.toString(), refresh_token })
     return { access_token, refresh_token }
   }
 
@@ -78,17 +92,17 @@ class UsersServices {
     return Boolean(result)
   }
 
-  async verifyEmail(user_id: ObjectId) {
-    await databaseServices.users.updateOne({ _id: user_id }, [
+  async verifyEmail({ user_id, verify }: signTokenProps) {
+    await databaseServices.users.updateOne({ _id: new ObjectId(user_id) }, [
       { $set: { verify: UserVerifyStatus.Verified, email_verify_token: '', updated_at: '$$NOW' } }
     ])
-    return this.login(user_id)
+    return this.login({ user_id, verify })
   }
 
-  async resendVerifyEmail(user_id: ObjectId) {
-    const verify_email_token = await this.signVerifyEmailToken(user_id.toString())
+  async resendVerifyEmail({ user_id, verify }: signTokenProps) {
+    const verify_email_token = await this.signVerifyEmailToken({ user_id, verify })
     await databaseServices.users.updateOne(
-      { _id: user_id },
+      { _id: new ObjectId(user_id) },
       {
         $set: { email_verify_token: verify_email_token },
         $currentDate: {
@@ -99,8 +113,8 @@ class UsersServices {
     return { verify_email_token }
   }
 
-  async forgotPassword(user_id: string) {
-    const forgot_password_token = await this.signForgotPasswordToken(user_id)
+  async forgotPassword({ user_id, verify }: signTokenProps) {
+    const forgot_password_token = await this.signForgotPasswordToken({ user_id, verify })
     await databaseServices.users.updateOne(
       { _id: new ObjectId(user_id) },
       {
@@ -129,7 +143,45 @@ class UsersServices {
     )
     return { message: USER_MESSAGES.RESET_PASSWORD_SUCCESSFUL }
   }
+
+  async getMe(user_id: string) {
+    const user = await databaseServices.users.findOne(
+      { _id: new ObjectId(user_id) },
+      { projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } }
+    )
+    return user
+  }
+
+  async updateMe(user_id: string, payload: UpdateMeReqBody) {
+    const updateData = { ...payload } as Omit<UpdateMeReqBody, 'date_of_birth'> & {
+      date_of_birth?: Date
+    }
+
+    if (payload.date_of_birth) {
+      updateData.date_of_birth = new Date(payload.date_of_birth)
+    }
+
+    const user = await databaseServices.users.findOneAndUpdate(
+      {
+        _id: new ObjectId(user_id)
+      },
+      {
+        $set: {
+          ...updateData
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      },
+      {
+        returnDocument: 'after',
+        projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 }
+      }
+    )
+    return user.value
+  }
 }
+
 const usersServices = new UsersServices()
 
 export default usersServices
