@@ -27,7 +27,8 @@ import {
   verifiedUserValidator,
   updateMeValidator,
   userIdValidator,
-  followValidator
+  followValidator,
+  unfollowValidator
 } from '~/middlewares/users.middlewares'
 import { UpdateMeReqBody } from '~/models/requests/User.requests'
 import { WrapAsync } from '~/utils/handlers'
@@ -146,14 +147,20 @@ usersRouter.patch(
  * Method: POST
  * Body: {followed_user_id: string}
  */
-usersRouter.post('/follow', accessTokenValidator, followValidator, WrapAsync(followController))
+usersRouter.post('/follow', accessTokenValidator, verifiedUserValidator, followValidator, WrapAsync(followController))
 
 /**
- * Description: Follow
- * Path: /follow
- * Method: POST
+ * Description: Unfollow
+ * Path: /follow:user_id
+ * Method: DELETE
  * Body: {followed_user_id: string}
  */
-usersRouter.post('/unfollow', accessTokenValidator, followValidator, WrapAsync(unfollowController))
+usersRouter.delete(
+  '/follow/:followed_user_id',
+  accessTokenValidator,
+  verifiedUserValidator,
+  unfollowValidator,
+  WrapAsync(unfollowController)
+)
 
 export default usersRouter
