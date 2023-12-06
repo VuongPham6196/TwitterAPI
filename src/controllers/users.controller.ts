@@ -9,7 +9,8 @@ import {
   VerifyForgotPassowrdReqBody,
   UpdateMeReqBody,
   GetUserProfileParams,
-  FollowReqBody
+  FollowReqBody,
+  UnfollowParams
 } from '~/models/requests/User.requests'
 import { ParamsDictionary } from 'express-serve-static-core'
 import usersServices from '~/services/users.services'
@@ -142,11 +143,7 @@ export const getMeController = async (req: Request, res: Response, next: NextFun
   })
 }
 
-export const getProfileController = async (
-  req: Request<ParamsDictionary, any, GetUserProfileParams>,
-  res: Response,
-  next: NextFunction
-) => {
+export const getProfileController = async (req: Request<GetUserProfileParams>, res: Response, next: NextFunction) => {
   const { user_id } = req.params
 
   const result = await usersServices.getProfile(user_id)
@@ -190,19 +187,15 @@ export const followController = async (
       message: USER_MESSAGES.ALREADY_FOLLOWED
     })
   }
-  const result = await usersServices.follow(user_id, req.body.followed_user_id)
+  const result = await usersServices.follow(user_id, followed_user_id)
   res.status(HTTP_STATUS.OK).json({
     result
   })
 }
 
-export const unfollowController = async (
-  req: Request<ParamsDictionary, any, FollowReqBody>,
-  res: Response,
-  next: NextFunction
-) => {
+export const unfollowController = async (req: Request<UnfollowParams>, res: Response, next: NextFunction) => {
   const { user_id } = req.decoded_authorization as TokenPayload
-  const { followed_user_id } = req.body
+  const { followed_user_id } = req.params
 
   const existFollow = await databaseServices.follows.findOne({
     user_id: new ObjectId(user_id),
@@ -214,7 +207,7 @@ export const unfollowController = async (
       message: USER_MESSAGES.ALREADY_UNFOLLOWED
     })
   }
-  const result = await usersServices.unfollow(user_id, req.body.followed_user_id)
+  const result = await usersServices.unfollow(user_id, followed_user_id)
   res.status(HTTP_STATUS.OK).json({
     result
   })
