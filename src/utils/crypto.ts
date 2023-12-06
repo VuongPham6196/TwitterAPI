@@ -2,7 +2,7 @@ import { createHash } from 'crypto'
 import { config } from 'dotenv'
 config()
 
-function sha256(content: string) {
+export function sha256(content: string) {
   return createHash('sha256').update(content).digest('hex')
 }
 
