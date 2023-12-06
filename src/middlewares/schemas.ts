@@ -284,6 +284,19 @@ export const ForgotPasswordTokenSchema: ParamSchema = {
   }
 }
 
+export const UserIDSchema: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.USERID_IS_REQUIRED
+  },
+  custom: {
+    options: (value) => {
+      if (!ObjectId.isValid(value))
+        throw new ErrorWithStatus({ message: USER_MESSAGES.USERID_IS_INVALID, status: HTTP_STATUS.UNAUTHORIZED })
+      return true
+    }
+  }
+}
+
 type generalStringSchema = {
   fieldName?: string
   required?: boolean

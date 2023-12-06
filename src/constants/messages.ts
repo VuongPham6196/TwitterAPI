@@ -49,5 +49,12 @@ export const USER_MESSAGES = {
   GET_ME_SUCCESSFUL: 'Get me successful',
   USER_NOT_VERIFIED: 'User not verified',
   UPDATE_ME_SUCCESSFUL: 'Update me successful',
-  NAME_IS_REQUIRED: 'Name is required'
+  NAME_IS_REQUIRED: 'Name is required',
+  USERID_IS_REQUIRED: 'Userid is required',
+  USERID_IS_INVALID: 'Invalid userid',
+  GET_PROFILE_SUCCESSFUL: 'Get profile successful',
+  FOLLOW_SUCCESS: 'Follow successful',
+  UNFOLLOW_SUCCESS: 'Unfollow successful',
+  ALREADY_FOLLOWED: 'Already followed',
+  ALREADY_UNFOLLOWED: 'Already unfollowed'
 } as const

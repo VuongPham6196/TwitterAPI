@@ -1,6 +1,6 @@
-import User from '~/models/schemas/User.schema'
+import User, { UserType } from '~/models/schemas/User.schema'
 import databaseServices from './database.services'
-import { RegisterReqBody, TokenPayload, UpdateMeReqBody } from '~/models/requests/User.requests'
+import { RegisterReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
 import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
@@ -8,6 +8,8 @@ import { ObjectId } from 'mongodb'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { config } from 'dotenv'
 import { USER_MESSAGES } from '~/constants/messages'
+import Follow from '~/models/schemas/Follow.schema'
+
 config()
 
 interface signTokenProps {
@@ -126,7 +128,7 @@ class UsersServices {
     )
     console.log(
       "Send email to user's email + forgot_password_token:",
-      `https://twitter.com/verify-forgot-passowrd?forgot-passowrd-token=${forgot_password_token}`
+      `http://localhost:3000/user/verify-forgot-passowrd?forgot-passowrd-token=${forgot_password_token}`
     )
     return { forgot_password_token }
   }
@@ -147,12 +149,29 @@ class UsersServices {
   async getMe(user_id: string) {
     const user = await databaseServices.users.findOne(
       { _id: new ObjectId(user_id) },
-      { projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } }
+      {
+        projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } as Partial<
+          Record<keyof UserType, number>
+        >
+      }
+    )
+    return user
+  }
+
+  async getProfile(user_id: string) {
+    const user = await databaseServices.users.findOne(
+      { _id: new ObjectId(user_id) },
+      {
+        projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } as Partial<
+          Record<keyof UserType, number>
+        >
+      }
     )
     return user
   }
 
   async updateMe(user_id: string, payload: UpdateMeReqBody) {
+    //must filter body field for risks such as token
     const updateData = { ...payload } as Omit<UpdateMeReqBody, 'date_of_birth'> & {
       date_of_birth?: Date
     }
@@ -179,6 +198,25 @@ class UsersServices {
       }
     )
     return user.value
+  }
+
+  async follow(user_id: string, followed_user_id: string) {
+    const follow = new Follow({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+
+    await databaseServices.follows.insertOne(follow)
+    return { message: USER_MESSAGES.FOLLOW_SUCCESS }
+  }
+
+  async unfollow(user_id: string, followed_user_id: string) {
+    await databaseServices.follows.deleteMany({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+
+    return { message: USER_MESSAGES.UNFOLLOW_SUCCESS }
   }
 }
 

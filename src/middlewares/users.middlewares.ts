@@ -1,12 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
-import { checkExact, checkSchema } from 'express-validator'
-import { JsonWebTokenError } from 'jsonwebtoken'
-import { ObjectId } from 'mongodb'
+import { checkSchema } from 'express-validator'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/schemas/Errors'
-import databaseServices from '~/services/database.services'
-import { verifyToken } from '~/utils/jwt'
 import { validate } from '~/utils/validation'
 import {
   AuthorizationSchema,
@@ -21,9 +17,9 @@ import {
   PasswordSchema,
   UsernameSchema,
   VerifyEmailTokenSchema,
-  generalStringSchema
+  generalStringSchema,
+  UserIDSchema
 } from './schemas'
-import User from '~/models/schemas/User.schema'
 import { UserVerifyStatus } from '~/constants/enums'
 import { TokenPayload } from '~/models/requests/User.requests'
 
@@ -124,6 +120,24 @@ export const updateMeValidator = validate(
       avatar: generalStringSchema({ fieldName: 'avatar', maxLength: 300 }),
       cover_photo: generalStringSchema({ fieldName: 'cover phote url', maxLength: 300 }),
       date_of_birth: { ...DateOfBirthSchema, optional: true }
+    },
+    ['body']
+  )
+)
+
+export const userIdValidator = validate(
+  checkSchema(
+    {
+      user_id: UserIDSchema
+    },
+    ['params']
+  )
+)
+
+export const followValidator = validate(
+  checkSchema(
+    {
+      followed_user_id: UserIDSchema
     },
     ['body']
   )

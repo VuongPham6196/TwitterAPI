@@ -7,7 +7,9 @@ import {
   VerifyEmailReqBody,
   ResetPasswordReqBody,
   VerifyForgotPassowrdReqBody,
-  UpdateMeReqBody
+  UpdateMeReqBody,
+  GetUserProfileParams,
+  FollowReqBody
 } from '~/models/requests/User.requests'
 import { ParamsDictionary } from 'express-serve-static-core'
 import usersServices from '~/services/users.services'
@@ -140,6 +142,21 @@ export const getMeController = async (req: Request, res: Response, next: NextFun
   })
 }
 
+export const getProfileController = async (
+  req: Request<ParamsDictionary, any, GetUserProfileParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.params
+
+  const result = await usersServices.getProfile(user_id)
+
+  res.status(HTTP_STATUS.OK).json({
+    message: USER_MESSAGES.GET_PROFILE_SUCCESSFUL,
+    result
+  })
+}
+
 export const updateMeController = async (
   req: Request<ParamsDictionary, any, UpdateMeReqBody>,
   res: Response,
@@ -151,6 +168,54 @@ export const updateMeController = async (
 
   res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.UPDATE_ME_SUCCESSFUL,
+    result
+  })
+}
+
+export const followController = async (
+  req: Request<ParamsDictionary, any, FollowReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { followed_user_id } = req.body
+
+  const existFollow = await databaseServices.follows.findOne({
+    user_id: new ObjectId(user_id),
+    followed_user_id: new ObjectId(followed_user_id)
+  })
+
+  if (existFollow) {
+    return res.status(HTTP_STATUS.OK).json({
+      message: USER_MESSAGES.ALREADY_FOLLOWED
+    })
+  }
+  const result = await usersServices.follow(user_id, req.body.followed_user_id)
+  res.status(HTTP_STATUS.OK).json({
+    result
+  })
+}
+
+export const unfollowController = async (
+  req: Request<ParamsDictionary, any, FollowReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { followed_user_id } = req.body
+
+  const existFollow = await databaseServices.follows.findOne({
+    user_id: new ObjectId(user_id),
+    followed_user_id: new ObjectId(followed_user_id)
+  })
+
+  if (!existFollow) {
+    return res.status(HTTP_STATUS.OK).json({
+      message: USER_MESSAGES.ALREADY_UNFOLLOWED
+    })
+  }
+  const result = await usersServices.unfollow(user_id, req.body.followed_user_id)
+  res.status(HTTP_STATUS.OK).json({
     result
   })
 }
