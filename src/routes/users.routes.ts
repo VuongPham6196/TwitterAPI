@@ -155,6 +155,7 @@ usersRouter.post('/follow', accessTokenValidator, verifiedUserValidator, followV
  * Method: DELETE
  * Body: {followed_user_id: string}
  */
+
 usersRouter.delete(
   '/follow/:followed_user_id',
   accessTokenValidator,
