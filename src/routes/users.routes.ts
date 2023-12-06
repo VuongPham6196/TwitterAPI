@@ -1,16 +1,20 @@
 import { Router } from 'express'
 import {
+  followController,
   forgotPasswordController,
   getMeController,
+  getProfileController,
   loginController,
   logoutController,
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
+  unfollowController,
   updateMeController,
   verifyEmailController,
   verifyForgotPasswordController
 } from '~/controllers/users.controller'
+import { filterUpdateUserMiddleware } from '~/middlewares/common.middelwares'
 import {
   loginValidator,
   accessTokenValidator,
@@ -21,8 +25,11 @@ import {
   verifiedForgotPasswordTokenValidator,
   resetPasswordTokenValidator,
   verifiedUserValidator,
-  updateMeValidator
+  updateMeValidator,
+  userIdValidator,
+  followValidator
 } from '~/middlewares/users.middlewares'
+import { UpdateMeReqBody } from '~/models/requests/User.requests'
 import { WrapAsync } from '~/utils/handlers'
 
 const usersRouter = Router()
@@ -104,6 +111,13 @@ usersRouter.post('/reset-password', resetPasswordTokenValidator, WrapAsync(reset
 usersRouter.get('/get-me', accessTokenValidator, WrapAsync(getMeController))
 
 /**
+ * Description: Get user profile
+ * Path: /get-profile/:user-id
+ * Method: GET
+ */
+usersRouter.get('/get-profile/:user_id', userIdValidator, WrapAsync(getProfileController))
+
+/**
  * Description: Update Me
  * Path: /update-me
  * Method: PATCH
@@ -114,7 +128,32 @@ usersRouter.patch(
   accessTokenValidator,
   verifiedUserValidator,
   updateMeValidator,
+  filterUpdateUserMiddleware<UpdateMeReqBody>([
+    'avatar',
+    'bio',
+    'cover_photo',
+    'date_of_birth',
+    'location',
+    'name',
+    'website'
+  ]),
   WrapAsync(updateMeController)
 )
+
+/**
+ * Description: Follow
+ * Path: /follow
+ * Method: POST
+ * Body: {followed_user_id: string}
+ */
+usersRouter.post('/follow', accessTokenValidator, followValidator, WrapAsync(followController))
+
+/**
+ * Description: Follow
+ * Path: /follow
+ * Method: POST
+ * Body: {followed_user_id: string}
+ */
+usersRouter.post('/unfollow', accessTokenValidator, followValidator, WrapAsync(unfollowController))
 
 export default usersRouter
