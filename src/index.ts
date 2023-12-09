@@ -1,7 +1,7 @@
 import express from 'express'
-import usersRouter from './src/routes/users.routes'
-import databaseServices from './src/services/database.services'
-import defaultErrorHandler from './src/middlewares/errors.middlewares'
+import usersRouter from './routes/users.routes'
+import databaseServices from './services/database.services'
+import defaultErrorHandler from './middlewares/errors.middlewares'
 
 databaseServices.connect()
 const app = express()
