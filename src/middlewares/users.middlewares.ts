@@ -18,10 +18,14 @@ import {
   UsernameSchema,
   VerifyEmailTokenSchema,
   generalStringSchema,
-  UserIDSchema
+  UserIdSchema,
+  followUserIdSchema
 } from './schemas'
 import { UserVerifyStatus } from '~/constants/enums'
-import { TokenPayload } from '~/models/requests/User.requests'
+import { TokenPayload, UpdateMeReqBody } from '~/models/requests/User.requests'
+import databaseServices from '~/services/database.services'
+import { ObjectId } from 'mongodb'
+import { USERNAME_REGEX } from '~/constants/regex'
 
 export const loginValidator = validate(
   checkSchema(
@@ -119,8 +123,32 @@ export const updateMeValidator = validate(
       website: generalStringSchema({ fieldName: 'website' }),
       avatar: generalStringSchema({ fieldName: 'avatar', maxLength: 300 }),
       cover_photo: generalStringSchema({ fieldName: 'cover phote url', maxLength: 300 }),
-      date_of_birth: { ...DateOfBirthSchema, optional: true }
-    },
+      date_of_birth: { ...DateOfBirthSchema, optional: true },
+      username: generalStringSchema({
+        fieldName: 'username',
+        minLength: 4,
+        maxLength: 15,
+        additionalSchema: {
+          custom: {
+            options: async (value, { req }) => {
+              if (!USERNAME_REGEX.test(value)) {
+                throw new Error(USER_MESSAGES.USERNAME_INVALID)
+              }
+              const user = await databaseServices.users.findOne({
+                username: value,
+                _id: {
+                  $ne: new ObjectId((req as Request).decoded_authorization?.user_id)
+                }
+              })
+              if (user) {
+                throw new Error(USER_MESSAGES.USERNAME_ALREADY_EXIST)
+              }
+              return true
+            }
+          }
+        }
+      })
+    } as Record<keyof UpdateMeReqBody, any>,
     ['body']
   )
 )
@@ -128,7 +156,7 @@ export const updateMeValidator = validate(
 export const userIdValidator = validate(
   checkSchema(
     {
-      user_id: UserIDSchema
+      user_id: UserIdSchema
     },
     ['params']
   )
@@ -137,7 +165,7 @@ export const userIdValidator = validate(
 export const followValidator = validate(
   checkSchema(
     {
-      followed_user_id: UserIDSchema
+      followed_user_id: followUserIdSchema
     },
     ['body']
   )
@@ -146,7 +174,7 @@ export const followValidator = validate(
 export const unfollowValidator = validate(
   checkSchema(
     {
-      followed_user_id: UserIDSchema
+      followed_user_id: followUserIdSchema
     },
     ['params']
   )

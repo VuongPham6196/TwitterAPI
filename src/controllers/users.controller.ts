@@ -187,6 +187,7 @@ export const followController = async (
       message: USER_MESSAGES.ALREADY_FOLLOWED
     })
   }
+
   const result = await usersServices.follow(user_id, followed_user_id)
   res.status(HTTP_STATUS.OK).json({
     result

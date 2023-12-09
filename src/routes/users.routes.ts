@@ -136,7 +136,8 @@ usersRouter.patch(
     'date_of_birth',
     'location',
     'name',
-    'website'
+    'website',
+    'username'
   ]),
   WrapAsync(updateMeController)
 )
