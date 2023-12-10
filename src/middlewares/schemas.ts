@@ -5,11 +5,13 @@ import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
 import { USERNAME_REGEX } from '~/constants/regex'
+import { ChangePasswordReqBody } from '~/models/requests/User.requests'
 import { ErrorWithStatus } from '~/models/schemas/Errors'
 import databaseServices from '~/services/database.services'
 import usersServices from '~/services/users.services'
 import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
+import { ParamsDictionary } from 'express-serve-static-core'
 
 export const AuthorizationSchema: ParamSchema = {
   custom: {
@@ -216,6 +218,27 @@ export const ConfirmPasswordSchema: ParamSchema = {
     options: (value, { req }) => {
       if (value !== req.body.password) {
         throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
+      }
+      return true
+    }
+  }
+}
+
+export const OldPasswordSchema: ParamSchema = {
+  notEmpty: { errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED },
+  custom: {
+    options: async (value, { req }) => {
+      const decoratedReq = req as Request<ParamsDictionary, any, ChangePasswordReqBody>
+      const { decoded_authorization } = decoratedReq
+      const { newPassword } = decoratedReq.body
+      const currentUser = await databaseServices.users.findOne({
+        _id: new ObjectId(decoded_authorization?.user_id)
+      })
+      if (hashPassword(value) != currentUser?.password) {
+        throw new Error(USER_MESSAGES.PASSWORD_INCORRECT)
+      }
+      if (hashPassword(newPassword) === currentUser?.password) {
+        throw new Error(USER_MESSAGES.PASSWORD_SHOULD_DIFFERRENCE)
       }
       return true
     }

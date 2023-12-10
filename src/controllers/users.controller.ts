@@ -10,7 +10,8 @@ import {
   UpdateMeReqBody,
   GetUserProfileParams,
   FollowReqBody,
-  UnfollowParams
+  UnfollowParams,
+  ChangePasswordReqBody
 } from '~/models/requests/User.requests'
 import { ParamsDictionary } from 'express-serve-static-core'
 import usersServices from '~/services/users.services'
@@ -209,6 +210,19 @@ export const unfollowController = async (req: Request<UnfollowParams>, res: Resp
     })
   }
   const result = await usersServices.unfollow(user_id, followed_user_id)
+  res.status(HTTP_STATUS.OK).json({
+    result
+  })
+}
+
+export const changePasswordController = async (
+  req: Request<ParamsDictionary, any, ChangePasswordReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+
+  const result = await usersServices.changePassword(user_id, req.body.newPassword)
   res.status(HTTP_STATUS.OK).json({
     result
   })

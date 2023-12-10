@@ -52,3 +52,9 @@ export interface GetUserProfileParams extends ParamsDictionary {
 export interface UnfollowParams extends ParamsDictionary {
   followed_user_id: string
 }
+
+export interface ChangePasswordReqBody {
+  oldPassword: string
+  newPassword: string
+  confirmNewPassword: string
+}

@@ -19,6 +19,10 @@ export const USER_MESSAGES = {
   PASSWORD_MUST_BE_FROM_6_TO_50_CHARACTERS: 'Password must be from 6 to 50 characters',
   PASSWORD_MUST_BE_STRONG:
     'Password must be at least 6 characters and contain at least one lowercase letter, one uppercase letter, one number and one symbol',
+  PASSWORD_INCORRECT: 'Password is incorrect',
+  PASSWORD_SHOULD_DIFFERRENCE:
+    'The new password you entered is the same as the old password. Please enter a different password',
+  CHANGE_PASSWORD_SUCCESSFUL: 'Change password succesfully',
   CONFIRM_PASSWORD_IS_REQUIRED: 'Confirm password is required',
   CONFIRM_PASSWORD_MUST_BE_STRING: 'Confirm password must be a string',
   CONFIRM_PASSWORD_MUST_BE_FROM_6_TO_50_CHARACTERS: 'Confirm password must be from 6 to 50 characters',

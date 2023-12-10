@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { checkSchema } from 'express-validator'
+import { ParamSchema, checkSchema } from 'express-validator'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/schemas/Errors'
@@ -19,10 +19,17 @@ import {
   VerifyEmailTokenSchema,
   generalStringSchema,
   UserIdSchema,
-  followUserIdSchema
+  followUserIdSchema,
+  OldPasswordSchema
 } from './schemas'
 import { UserVerifyStatus } from '~/constants/enums'
-import { TokenPayload, UpdateMeReqBody } from '~/models/requests/User.requests'
+import {
+  ChangePasswordReqBody,
+  RegisterReqBody,
+  ResetPasswordReqBody,
+  TokenPayload,
+  UpdateMeReqBody
+} from '~/models/requests/User.requests'
 import databaseServices from '~/services/database.services'
 import { ObjectId } from 'mongodb'
 import { USERNAME_REGEX } from '~/constants/regex'
@@ -45,7 +52,7 @@ export const registerValidator = validate(
       password: PasswordSchema,
       confirm_password: ConfirmPasswordSchema,
       date_of_birth: DateOfBirthSchema
-    },
+    } as Record<keyof RegisterReqBody, ParamSchema>,
     ['body']
   )
 )
@@ -101,7 +108,7 @@ export const resetPasswordTokenValidator = validate(
       forgot_password_token: ForgotPasswordTokenSchema,
       password: PasswordSchema,
       confirm_password: ConfirmPasswordSchema
-    },
+    } as Record<keyof ResetPasswordReqBody, ParamSchema>,
     ['body']
   )
 )
@@ -177,5 +184,26 @@ export const unfollowValidator = validate(
       followed_user_id: followUserIdSchema
     },
     ['params']
+  )
+)
+
+export const changePasswordValidator = validate(
+  checkSchema(
+    {
+      oldPassword: OldPasswordSchema,
+      newPassword: PasswordSchema,
+      confirmNewPassword: {
+        ...ConfirmPasswordSchema,
+        custom: {
+          options: (value, { req }) => {
+            if (value !== (req.body as ChangePasswordReqBody).newPassword) {
+              throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
+            }
+            return true
+          }
+        }
+      }
+    } as Record<keyof ChangePasswordReqBody, ParamSchema>,
+    ['body']
   )
 )

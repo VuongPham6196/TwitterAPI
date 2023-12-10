@@ -218,6 +218,20 @@ class UsersServices {
 
     return { message: USER_MESSAGES.UNFOLLOW_SUCCESS }
   }
+
+  async changePassword(user_id: string, newPassword: string) {
+    await databaseServices.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: { password: hashPassword(newPassword) },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+
+    return { message: USER_MESSAGES.CHANGE_PASSWORD_SUCCESSFUL }
+  }
 }
 
 const usersServices = new UsersServices()
