@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import {
+  changePasswordController,
   followController,
   forgotPasswordController,
   getMeController,
@@ -28,7 +29,8 @@ import {
   updateMeValidator,
   userIdValidator,
   followValidator,
-  unfollowValidator
+  unfollowValidator,
+  changePasswordValidator
 } from '~/middlewares/users.middlewares'
 import { UpdateMeReqBody } from '~/models/requests/User.requests'
 import { WrapAsync } from '~/utils/handlers'
@@ -136,7 +138,8 @@ usersRouter.patch(
     'date_of_birth',
     'location',
     'name',
-    'website'
+    'website',
+    'username'
   ]),
   WrapAsync(updateMeController)
 )
@@ -162,6 +165,21 @@ usersRouter.delete(
   verifiedUserValidator,
   unfollowValidator,
   WrapAsync(unfollowController)
+)
+
+/**
+ * Description: Change password
+ * Path: /follow:user_id
+ * Method: PUT
+ * Body: {followed_user_id: string}
+ */
+
+usersRouter.put(
+  '/change-password',
+  accessTokenValidator,
+  verifiedUserValidator,
+  changePasswordValidator,
+  WrapAsync(changePasswordController)
 )
 
 export default usersRouter

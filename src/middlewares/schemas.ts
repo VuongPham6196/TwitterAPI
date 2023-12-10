@@ -4,11 +4,14 @@ import { JsonWebTokenError } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
+import { USERNAME_REGEX } from '~/constants/regex'
+import { ChangePasswordReqBody } from '~/models/requests/User.requests'
 import { ErrorWithStatus } from '~/models/schemas/Errors'
 import databaseServices from '~/services/database.services'
 import usersServices from '~/services/users.services'
 import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
+import { ParamsDictionary } from 'express-serve-static-core'
 
 export const AuthorizationSchema: ParamSchema = {
   custom: {
@@ -163,12 +166,24 @@ export const UsernameSchema: ParamSchema = {
   },
   isLength: {
     options: {
-      min: 1,
-      max: 100
+      min: 4,
+      max: 15
     },
-    errorMessage: USER_MESSAGES.USERNAME_MUST_BE_FROM_1_TO_100_CHARACTERS
+    errorMessage: USER_MESSAGES.USERNAME_MUST_BE_FROM_4_TO_15_CHARACTERS
   },
-  trim: true
+  trim: true,
+  custom: {
+    options: async (value) => {
+      if (!USERNAME_REGEX.test(value)) {
+        throw new Error(USER_MESSAGES.USERNAME_INVALID)
+      }
+      const user = await databaseServices.users.findOne({ username: value })
+      if (user) {
+        throw new Error(USER_MESSAGES.USERNAME_ALREADY_EXIST)
+      }
+      return true
+    }
+  }
 }
 
 export const PasswordSchema: ParamSchema = {
@@ -203,6 +218,27 @@ export const ConfirmPasswordSchema: ParamSchema = {
     options: (value, { req }) => {
       if (value !== req.body.password) {
         throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH)
+      }
+      return true
+    }
+  }
+}
+
+export const OldPasswordSchema: ParamSchema = {
+  notEmpty: { errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED },
+  custom: {
+    options: async (value, { req }) => {
+      const decoratedReq = req as Request<ParamsDictionary, any, ChangePasswordReqBody>
+      const { decoded_authorization } = decoratedReq
+      const { newPassword } = decoratedReq.body
+      const currentUser = await databaseServices.users.findOne({
+        _id: new ObjectId(decoded_authorization?.user_id)
+      })
+      if (hashPassword(value) != currentUser?.password) {
+        throw new Error(USER_MESSAGES.PASSWORD_INCORRECT)
+      }
+      if (hashPassword(newPassword) === currentUser?.password) {
+        throw new Error(USER_MESSAGES.PASSWORD_SHOULD_DIFFERRENCE)
       }
       return true
     }
@@ -284,7 +320,7 @@ export const ForgotPasswordTokenSchema: ParamSchema = {
   }
 }
 
-export const UserIDSchema: ParamSchema = {
+export const UserIdSchema: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.USERID_IS_REQUIRED
   },
@@ -292,6 +328,26 @@ export const UserIDSchema: ParamSchema = {
     options: (value) => {
       if (!ObjectId.isValid(value))
         throw new ErrorWithStatus({ message: USER_MESSAGES.USERID_IS_INVALID, status: HTTP_STATUS.UNAUTHORIZED })
+
+      return true
+    }
+  }
+}
+
+export const followUserIdSchema: ParamSchema = {
+  notEmpty: {
+    errorMessage: USER_MESSAGES.USERID_IS_REQUIRED
+  },
+  custom: {
+    options: (value, { req }) => {
+      if (!ObjectId.isValid(value))
+        throw new ErrorWithStatus({ message: USER_MESSAGES.USERID_IS_INVALID, status: HTTP_STATUS.UNAUTHORIZED })
+      if ((req as Request).decoded_authorization?.user_id === value) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGES.CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF,
+          status: HTTP_STATUS.UNAUTHORIZED
+        })
+      }
       return true
     }
   }
@@ -302,13 +358,15 @@ type generalStringSchema = {
   required?: boolean
   minLength?: number
   maxLength?: number
+  additionalSchema?: ParamSchema
 }
 
 export const generalStringSchema = ({
   fieldName = 'Field',
   required = false,
   minLength = 0,
-  maxLength = 100
+  maxLength = 100,
+  additionalSchema
 }: generalStringSchema): ParamSchema => {
   const schema: ParamSchema = {
     optional: !required,
@@ -329,5 +387,6 @@ export const generalStringSchema = ({
     },
     trim: true
   }
-  return schema
+
+  return { ...schema, ...additionalSchema }
 }
