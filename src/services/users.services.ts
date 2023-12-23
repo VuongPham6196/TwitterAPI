@@ -9,6 +9,7 @@ import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { config } from 'dotenv'
 import { USER_MESSAGES } from '~/constants/messages'
 import Follow from '~/models/schemas/Follow.schema'
+import axios from 'axios'
 
 config()
 
@@ -62,6 +63,37 @@ class UsersServices {
     return databaseServices.refreshTokens.insertOne(refreshToken)
   }
 
+  private async getOauthGoogleToken(code: string) {
+    const body = {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    }
+    const { data } = await axios.post('https:/oauth2.googleapis.com/token', body, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+
+    return data
+  }
+
+  private async getGoogleUserInfo(access_token: string, id_token: string) {
+    const { data } = await axios.get('https:/www.googleapis.com/oauth2/v1/userinfo', {
+      params: {
+        access_token,
+        alt: 'json'
+      },
+      headers: {
+        Authorization: `Bearer ${id_token}`
+      }
+    })
+
+    return data
+  }
+
   async registerUser(payload: RegisterReqBody) {
     const result = await databaseServices.users.insertOne(
       new User({ ...payload, date_of_birth: new Date(payload.date_of_birth), password: hashPassword(payload.password) })
@@ -82,6 +114,13 @@ class UsersServices {
     })
     await this.insertRefeshTokenToDataBase({ user_id: user_id.toString(), refresh_token })
     return { access_token, refresh_token }
+  }
+
+  async oauth(code: string) {
+    const { id_token, access_token } = await this.getOauthGoogleToken(code)
+    const userInfo = await this.getGoogleUserInfo(access_token, id_token)
+    console.log(userInfo)
+    return userInfo
   }
 
   async logout(refresh_token: string) {

@@ -7,6 +7,7 @@ import {
   getProfileController,
   loginController,
   logoutController,
+  oauthController,
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
@@ -181,5 +182,14 @@ usersRouter.put(
   changePasswordValidator,
   WrapAsync(changePasswordController)
 )
+
+/**
+ * Description: Oauth v2.0 Google
+ * Path: /oauth/google
+ * Method: GET
+ * Body: {followed_user_id: string}
+ */
+
+usersRouter.get('/oauth/google', WrapAsync(oauthController))
 
 export default usersRouter

@@ -227,3 +227,12 @@ export const changePasswordController = async (
     result
   })
 }
+
+export const oauthController = async (req: Request, res: Response, next: NextFunction) => {
+  const { code } = req.query
+  const data = await usersServices.oauth(code as string)
+  res.status(HTTP_STATUS.OK).json({
+    message: USER_MESSAGES.LOGIN_SUCCESSFUL,
+    data
+  })
+}
