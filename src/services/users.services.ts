@@ -10,6 +10,9 @@ import { config } from 'dotenv'
 import { USER_MESSAGES } from '~/constants/messages'
 import Follow from '~/models/schemas/Follow.schema'
 import axios from 'axios'
+import { ErrorWithStatus } from '~/models/schemas/Errors'
+import HTTP_STATUS from '~/constants/httpStatus'
+import _ from 'lodash'
 
 config()
 
@@ -21,6 +24,13 @@ interface signTokenProps {
 interface InsertRefeshTokenToDataBaseProps {
   user_id: string
   refresh_token: string
+}
+
+type OAuthRespone = {
+  access_token: string
+  refresh_token: string
+  newUser: boolean
+  verify: UserVerifyStatus
 }
 
 class UsersServices {
@@ -77,7 +87,7 @@ class UsersServices {
       }
     })
 
-    return data
+    return data as { id_token: string; access_token: string }
   }
 
   private async getGoogleUserInfo(access_token: string, id_token: string) {
@@ -91,7 +101,12 @@ class UsersServices {
       }
     })
 
-    return data
+    return data as {
+      email: string
+      verified_email: boolean
+      name: string
+      picture: string
+    }
   }
 
   async registerUser(payload: RegisterReqBody) {
@@ -104,7 +119,9 @@ class UsersServices {
       { _id: result.insertedId },
       { $set: { email_verify_token: verify_email_token } }
     )
-    return { verify_email_token }
+    console.log('send token to email: ', verify_email_token)
+    const data = await this.login({ user_id, verify: UserVerifyStatus.Unverified })
+    return data
   }
 
   async login({ user_id, verify }: signTokenProps) {
@@ -116,11 +133,36 @@ class UsersServices {
     return { access_token, refresh_token }
   }
 
-  async oauth(code: string) {
+  async oauth(code: string): Promise<OAuthRespone> {
     const { id_token, access_token } = await this.getOauthGoogleToken(code)
     const userInfo = await this.getGoogleUserInfo(access_token, id_token)
-    console.log(userInfo)
-    return userInfo
+    if (!userInfo.verified_email) {
+      throw new ErrorWithStatus({ status: HTTP_STATUS.BAD_REQUEST, message: USER_MESSAGES.GMAIL_NOT_VERIFIED })
+    }
+
+    const user = await databaseServices.users.findOne({ email: userInfo.email })
+
+    if (user) {
+      const data = await this.login({ user_id: user._id.toString(), verify: UserVerifyStatus.Verified })
+      return {
+        ...data,
+        newUser: false,
+        verify: user.verify
+      }
+    } else {
+      const passowrd = _.capitalize(Math.random().toString(36).slice(2) + '@')
+      const data = await this.registerUser({
+        email: userInfo.email,
+        name: userInfo.name,
+        username: userInfo.email,
+        password: passowrd,
+        confirm_password: passowrd,
+        date_of_birth: new Date().toISOString(),
+        avatar: userInfo.picture
+      })
+
+      return { ...data, newUser: true, verify: UserVerifyStatus.Unverified }
+    }
   }
 
   async logout(refresh_token: string) {
