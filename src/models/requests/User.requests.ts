@@ -10,6 +10,7 @@ export interface RegisterReqBody {
   confirm_password: string
   date_of_birth: string
   name: string
+  avatar?: string
 }
 
 export interface LogoutReqBody {

@@ -63,5 +63,6 @@ export const USER_MESSAGES = {
   UNFOLLOW_SUCCESS: 'Unfollow successful',
   ALREADY_FOLLOWED: 'Already followed',
   ALREADY_UNFOLLOWED: 'Already unfollowed',
-  CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF: 'Can not follow or unfollow yourself'
+  CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF: 'Can not follow or unfollow yourself',
+  GMAIL_NOT_VERIFIED: 'Gmail not verified'
 } as const
