@@ -66,3 +66,10 @@ export const USER_MESSAGES = {
   CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF: 'Can not follow or unfollow yourself',
   GMAIL_NOT_VERIFIED: 'Gmail not verified'
 } as const
+
+export const UPLOAD_MESSAGE = {
+  UPLOAD_SUCCESSFUL: 'Upload successfull',
+  UPLOAD_FAILED: 'Upload failed',
+  FILE_IS_EMPTY: 'File is empty',
+  INVALID_FILE_TYPE: 'Invalid file type'
+} as const
