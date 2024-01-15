@@ -5,6 +5,7 @@ import defaultErrorHandler from './middlewares/errors.middlewares'
 import cors from 'cors'
 import mediasRoute from './routes/medias.routes'
 import { initFolder } from './utils/file'
+import staticRoute from './routes/statics.routes'
 
 initFolder()
 
@@ -18,6 +19,7 @@ app.use(express.json())
 
 app.use('/users', usersRouter)
 app.use('/medias', mediasRoute)
+app.use('/static', staticRoute)
 
 app.use(defaultErrorHandler)
 

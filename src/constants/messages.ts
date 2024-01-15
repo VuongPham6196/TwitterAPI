@@ -71,5 +71,6 @@ export const UPLOAD_MESSAGE = {
   UPLOAD_SUCCESSFUL: 'Upload successfull',
   UPLOAD_FAILED: 'Upload failed',
   FILE_IS_EMPTY: 'File is empty',
-  INVALID_FILE_TYPE: 'Invalid file type'
+  INVALID_FILE_TYPE: 'Invalid file type',
+  NOT_FOUND: 'File not found!'
 } as const

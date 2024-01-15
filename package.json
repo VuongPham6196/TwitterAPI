@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npx nodemon development",
+    "dev": "npx nodemon --development",
     "build": "rimraf ./dist && tsc && tsc-alias",
-    "start": "node dist/index.js production",
+    "start": "node dist/index.js --production",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check .",
@@ -22,6 +22,7 @@
     "@types/formidable": "^3.4.5",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/lodash": "^4.14.198",
+    "@types/minimist": "^1.2.5",
     "@types/mongodb": "^4.0.7",
     "@types/node": "^20.4.5",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
@@ -47,6 +48,7 @@
     "formidable": "^3.5.1",
     "jsonwebtoken": "^9.0.1",
     "lodash": "^4.17.21",
+    "minimist": "^1.2.8",
     "mongodb": "^5.7.0",
     "sharp": "^0.33.1"
   },

@@ -10,7 +10,7 @@ import { config } from 'dotenv'
 import { USER_MESSAGES } from '~/constants/messages'
 import Follow from '~/models/schemas/Follow.schema'
 import axios from 'axios'
-import { ErrorWithStatus } from '~/models/schemas/Errors'
+import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
 import _ from 'lodash'
 
