@@ -26,6 +26,12 @@ interface InsertRefeshTokenToDataBaseProps {
   refresh_token: string
 }
 
+interface RefreshTokenProps {
+  user_id: string
+  verify: UserVerifyStatus
+  old_refresh_token: string
+}
+
 type OAuthRespone = {
   access_token: string
   refresh_token: string
@@ -126,10 +132,10 @@ class UsersServices {
 
   async login({ user_id, verify }: signTokenProps) {
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
-      user_id: user_id.toString(),
+      user_id: user_id,
       verify
     })
-    await this.insertRefeshTokenToDataBase({ user_id: user_id.toString(), refresh_token })
+    await this.insertRefeshTokenToDataBase({ user_id: user_id, refresh_token })
     return { access_token, refresh_token }
   }
 
@@ -163,6 +169,18 @@ class UsersServices {
 
       return { ...data, newUser: true, verify: UserVerifyStatus.Unverified }
     }
+  }
+
+  async refreshToken({ old_refresh_token, user_id, verify }: RefreshTokenProps) {
+    const [[access_token, refresh_token]] = await Promise.all([
+      this.signAccessAndRefreshToken({
+        user_id: user_id.toString(),
+        verify
+      }),
+      databaseServices.refreshTokens.deleteOne({ refresh_token: old_refresh_token })
+    ])
+    await this.insertRefeshTokenToDataBase({ user_id, refresh_token })
+    return { access_token, refresh_token }
   }
 
   async logout(refresh_token: string) {

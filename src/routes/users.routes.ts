@@ -8,6 +8,7 @@ import {
   loginController,
   logoutController,
   oauthController,
+  refreshTokenController,
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
@@ -44,7 +45,6 @@ const usersRouter = Router()
  * Method: POST
  * Body: {email: string, password: string}
  */
-
 usersRouter.post('/login', loginValidator, WrapAsync(loginController))
 
 /**
@@ -54,6 +54,14 @@ usersRouter.post('/login', loginValidator, WrapAsync(loginController))
  * Body: {name: srting, email: string, password: string, confirmPassword: string, date_of_birth: ISO8601}
  */
 usersRouter.post('/register', registerValidator, WrapAsync(registerController))
+
+/**
+ * Description: Refresh token
+ * Path: /refresh-token
+ * Method: POST
+ * Body: {refreshToken: string}
+ */
+usersRouter.post('/refresh-token', refreshTokenValidator, WrapAsync(refreshTokenController))
 
 /**
  * Description: Logout a user

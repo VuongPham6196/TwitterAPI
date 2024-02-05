@@ -3,6 +3,7 @@ export const USER_MESSAGES = {
   LOGIN_SUCCESSFUL: 'Login successful',
   REGISTER_FAILED: 'Register failed',
   REGISTER_SUCCESSFUL: 'Register successful',
+  REFRESH_TOKEN_SUCCESS: 'Refresh token successful',
   VALIDATION_ERROR: 'Validation error',
   USERNAME_AND_PASSWORD_ARE_REQUIRED: 'Username and password are required',
   USERNAME_IS_REQUIRED: 'UserName is required',
@@ -73,4 +74,8 @@ export const UPLOAD_MESSAGE = {
   FILE_IS_EMPTY: 'File is empty',
   INVALID_FILE_TYPE: 'Invalid file type',
   NOT_FOUND: 'File not found!'
+} as const
+
+export const MEDIA_MESSAGE = {
+  RANGE_IS_REQUIRED: 'Range is required'
 } as const
