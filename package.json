@@ -2,7 +2,8 @@
   "name": "nodejs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "indexjts",
+  "type": "commonjs",
   "scripts": {
     "dev": "npx nodemon --development",
     "build": "rimraf ./dist && tsc && tsc-alias",
@@ -25,6 +26,7 @@
     "@types/minimist": "^1.2.5",
     "@types/mongodb": "^4.0.7",
     "@types/node": "^20.4.5",
+    "@types/node-fetch": "^2.6.11",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",
     "eslint": "^8.46.0",
@@ -40,9 +42,11 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "@types/uuid": "^9.0.8",
     "axios": "^1.6.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
+    "execa": "^8.0.1",
     "express": "^4.18.2",
     "express-validator": "^7.0.1",
     "formidable": "^3.5.1",
@@ -50,7 +54,10 @@
     "lodash": "^4.17.21",
     "minimist": "^1.2.8",
     "mongodb": "^5.7.0",
-    "sharp": "^0.33.1"
+    "node-fetch": "^2.6.7",
+    "sharp": "^0.33.1",
+    "slash": "^5.1.0",
+    "uuid": "^9.0.1"
   },
   "jest": {
     "transformIgnorePatterns": [

@@ -17,3 +17,11 @@ export const uploadVideoController = async (req: Request, res: Response, next: N
     result
   })
 }
+
+export const uploadHLSVideoController = async (req: Request, res: Response, next: NextFunction) => {
+  const result = await mediasServices.uploadHLSVideoHandler(req)
+  res.json({
+    message: UPLOAD_MESSAGE.UPLOAD_SUCCESSFUL,
+    result
+  })
+}

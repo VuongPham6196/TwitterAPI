@@ -6,7 +6,7 @@ import { UPLOAD_IMAGE_DIR } from '~/constants/dir'
 import { MediaType } from '~/constants/enums'
 import { Media } from '~/models/Others'
 import { isProduction } from '~/utils/config'
-import { getNameFromFullName, uploadImageHandler, uploadVideoHandler } from '~/utils/file'
+import { getNameFromFullName, uploadHLSVideoHandler, uploadImageHandler, uploadVideoHandler } from '~/utils/file'
 
 config()
 
@@ -37,6 +37,20 @@ class MediasServices {
         url: isProduction
           ? `https://tw-v1/static/videos/${file.newFilename}`
           : `http://localhost:${process.env.PORT}/static/videos/${file.newFilename}`,
+        type: MediaType.Video
+      }
+    })
+
+    return result
+  }
+
+  async uploadHLSVideoHandler(req: Request) {
+    const files = await uploadHLSVideoHandler(req)
+    const result: Media[] = files.map((file) => {
+      return {
+        url: isProduction
+          ? `https://tw-v1/static/hls-videos/${file.newFilename}`
+          : `http://localhost:${process.env.PORT}/static/hls-videos/${file.newFilename}`,
         type: MediaType.Video
       }
     })
