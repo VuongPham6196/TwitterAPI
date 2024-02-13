@@ -19,17 +19,20 @@ config()
 interface signTokenProps {
   user_id: string
   verify: UserVerifyStatus
+  exp?: number
 }
 
 interface InsertRefeshTokenToDataBaseProps {
   user_id: string
   refresh_token: string
+  exp?: number
 }
 
 interface RefreshTokenProps {
   user_id: string
   verify: UserVerifyStatus
   old_refresh_token: string
+  exp?: number
 }
 
 type OAuthRespone = {
@@ -47,7 +50,13 @@ class UsersServices {
       options: { expiresIn: process.env.ACCESS_TOKEN_LIFE }
     })
   }
-  private signRefreshToken({ user_id, verify }: signTokenProps) {
+  private signRefreshToken({ user_id, verify, exp }: signTokenProps) {
+    if (exp) {
+      return signToken({
+        payload: { user_id, token_type: TokenType.RefreshToken, verify, exp },
+        privateKey: process.env.JWT_REFRESH_TOKEN_SECRET as string
+      })
+    }
     return signToken({
       payload: { user_id, token_type: TokenType.RefreshToken, verify },
       privateKey: process.env.JWT_REFRESH_TOKEN_SECRET as string,
@@ -70,12 +79,16 @@ class UsersServices {
     })
   }
 
-  private signAccessAndRefreshToken({ user_id, verify }: signTokenProps) {
-    return Promise.all([this.signAccessToken({ user_id, verify }), this.signRefreshToken({ user_id, verify })])
+  private signAccessAndRefreshToken({ user_id, verify, exp }: signTokenProps) {
+    if (exp) {
+      return Promise.all([this.signAccessToken({ user_id, verify }), this.signRefreshToken({ user_id, verify, exp })])
+    } else {
+      return Promise.all([this.signAccessToken({ user_id, verify }), this.signRefreshToken({ user_id, verify })])
+    }
   }
 
-  private insertRefeshTokenToDataBase({ user_id, refresh_token }: InsertRefeshTokenToDataBaseProps) {
-    const refreshToken = new RefreshToken({ user_id: new ObjectId(user_id), refresh_token })
+  private insertRefeshTokenToDataBase({ user_id, refresh_token, exp }: InsertRefeshTokenToDataBaseProps) {
+    const refreshToken = new RefreshToken({ user_id: new ObjectId(user_id), refresh_token, exp })
     return databaseServices.refreshTokens.insertOne(refreshToken)
   }
 
@@ -130,10 +143,11 @@ class UsersServices {
     return data
   }
 
-  async login({ user_id, verify }: signTokenProps) {
+  async login({ user_id, verify, exp }: signTokenProps) {
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
       user_id: user_id,
-      verify
+      verify,
+      exp
     })
     await this.insertRefeshTokenToDataBase({ user_id: user_id, refresh_token })
     return { access_token, refresh_token }
@@ -171,15 +185,16 @@ class UsersServices {
     }
   }
 
-  async refreshToken({ old_refresh_token, user_id, verify }: RefreshTokenProps) {
+  async refreshToken({ old_refresh_token, user_id, verify, exp }: RefreshTokenProps) {
     const [[access_token, refresh_token]] = await Promise.all([
       this.signAccessAndRefreshToken({
         user_id: user_id.toString(),
-        verify
+        verify,
+        exp
       }),
       databaseServices.refreshTokens.deleteOne({ refresh_token: old_refresh_token })
     ])
-    await this.insertRefeshTokenToDataBase({ user_id, refresh_token })
+    await this.insertRefeshTokenToDataBase({ user_id, refresh_token, exp })
     return { access_token, refresh_token }
   }
 
