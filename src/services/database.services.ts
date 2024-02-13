@@ -30,6 +30,33 @@ class DatabaseServices {
     }
   }
 
+  async indexUsers() {
+    await this.users.dropIndexes()
+    this.users.createIndex(
+      { username: 1 },
+      {
+        unique: true
+      }
+    )
+    this.users.createIndex(
+      { email: 1 },
+      {
+        unique: true
+      }
+    )
+  }
+
+  async indexRefreshTokens() {
+    await this.refreshTokens.dropIndexes()
+    this.refreshTokens.createIndex({ refresh_token: 1 })
+    this.refreshTokens.createIndex(
+      { exp: 1 },
+      {
+        expireAfterSeconds: 0
+      }
+    )
+  }
+
   get users(): Collection<User> {
     return this.db.collection(process.env.DB_USERS_COLLECTION as string)
   }
@@ -42,5 +69,8 @@ class DatabaseServices {
 }
 
 const databaseServices = new DatabaseServices()
+
+databaseServices.indexUsers()
+databaseServices.indexRefreshTokens()
 
 export default databaseServices
