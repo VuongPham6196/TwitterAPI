@@ -70,7 +70,4 @@ class DatabaseServices {
 
 const databaseServices = new DatabaseServices()
 
-databaseServices.indexUsers()
-databaseServices.indexRefreshTokens()
-
 export default databaseServices

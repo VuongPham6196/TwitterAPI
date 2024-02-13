@@ -9,7 +9,10 @@ import staticRoute from './routes/statics.routes'
 
 initFolder()
 
-databaseServices.connect()
+databaseServices.connect().then(() => {
+  databaseServices.indexUsers()
+  databaseServices.indexRefreshTokens()
+})
 const app = express()
 
 const port = 4000
