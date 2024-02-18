@@ -8,7 +8,7 @@ import { USERNAME_REGEX } from '~/constants/regex'
 import { ChangePasswordReqBody } from '~/models/requests/User.requests'
 import { ErrorWithStatus } from '~/models/Errors'
 import databaseServices from '~/services/database.services'
-import usersServices from '~/services/users.services'
+import userServices from '~/services/user.services'
 import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import { ParamsDictionary } from 'express-serve-static-core'
@@ -145,7 +145,7 @@ export const RegisterEmailSchema: ParamSchema = {
   trim: true,
   custom: {
     options: async (value) => {
-      const isExist = await usersServices.checkEmailExist(value)
+      const isExist = await userServices.checkEmailExist(value)
       if (isExist) {
         throw new ErrorWithStatus({
           message: USER_MESSAGES.EMAIL_ALREADY_EXISTS,
@@ -334,7 +334,7 @@ export const UserIdSchema: ParamSchema = {
   }
 }
 
-export const followUserIdSchema: ParamSchema = {
+export const FollowUserIdSchema: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGES.USERID_IS_REQUIRED
   },
@@ -351,42 +351,4 @@ export const followUserIdSchema: ParamSchema = {
       return true
     }
   }
-}
-
-type generalStringSchema = {
-  fieldName?: string
-  required?: boolean
-  minLength?: number
-  maxLength?: number
-  additionalSchema?: ParamSchema
-}
-
-export const generalStringSchema = ({
-  fieldName = 'Field',
-  required = false,
-  minLength = 0,
-  maxLength = 100,
-  additionalSchema
-}: generalStringSchema): ParamSchema => {
-  const schema: ParamSchema = {
-    optional: !required,
-    isString: {
-      errorMessage: `${fieldName} must be string!`
-    },
-    notEmpty: required
-      ? {
-          errorMessage: `${fieldName} is required!`
-        }
-      : undefined,
-    isLength: {
-      options: {
-        min: minLength,
-        max: maxLength
-      },
-      errorMessage: `${fieldName} must be from ${minLength} to ${maxLength} characters!`
-    },
-    trim: true
-  }
-
-  return { ...schema, ...additionalSchema }
 }

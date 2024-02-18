@@ -79,3 +79,15 @@ export const UPLOAD_MESSAGE = {
 export const MEDIA_MESSAGE = {
   RANGE_IS_REQUIRED: 'Range is required'
 } as const
+
+export const TWEET_MESSAGE = {
+  INVALID_TYPE: 'Invalid type',
+  INVALID_AUDIENCE: 'Invalid audience',
+  HASTAGS_MUST_BE_ARRAY_OF_STRING: 'Hastags must be array of string',
+  MENTIONS_MUST_BE_ARRAY_OF_OBJECTID: 'Hastags must be array of ObjectId',
+  CONTENT_IS_REQUIRED: 'Content is required',
+  CONTENT_MUST_BE_STRING: 'Content must be string',
+  INVALID_PARENT_ID: 'Invalid parent id',
+  PARENT_ID_MUST_BE_NULL: 'Parent id must be null',
+  MEDIAS_MUST_BE_ARRAY_OF_MEDIA_OBJECT: 'Medias must be array of media object'
+}

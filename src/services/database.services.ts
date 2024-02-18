@@ -3,6 +3,7 @@ import { config } from 'dotenv'
 import User from '~/models/schemas/User.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import Follow from '~/models/schemas/Follow.schema'
+import { Tweet } from '~/models/schemas/Tweet.schema'
 config()
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@v1.b170zpb.mongodb.net/?retryWrites=true&w=majority`
@@ -69,6 +70,9 @@ class DatabaseServices {
   }
   get follows(): Collection<Follow> {
     return this.db.collection(process.env.DB_FOLLOWS_COLLECTION as string)
+  }
+  get tweets(): Collection<Tweet> {
+    return this.db.collection(process.env.DB_TWEETS_COLLECTION as string)
   }
 }
 

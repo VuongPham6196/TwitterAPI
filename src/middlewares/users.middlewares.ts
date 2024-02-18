@@ -17,11 +17,10 @@ import {
   PasswordSchema,
   UsernameSchema,
   VerifyEmailTokenSchema,
-  generalStringSchema,
   UserIdSchema,
-  followUserIdSchema,
+  FollowUserIdSchema,
   OldPasswordSchema
-} from './schemas'
+} from './users.schemas'
 import { UserVerifyStatus } from '~/constants/enums'
 import {
   ChangePasswordReqBody,
@@ -33,6 +32,7 @@ import {
 import databaseServices from '~/services/database.services'
 import { ObjectId } from 'mongodb'
 import { USERNAME_REGEX } from '~/constants/regex'
+import { generalStringSchema } from '~/utils/general'
 
 export const loginValidator = validate(
   checkSchema(
@@ -172,7 +172,7 @@ export const userIdValidator = validate(
 export const followValidator = validate(
   checkSchema(
     {
-      followed_user_id: followUserIdSchema
+      followed_user_id: FollowUserIdSchema
     },
     ['body']
   )
@@ -181,7 +181,7 @@ export const followValidator = validate(
 export const unfollowValidator = validate(
   checkSchema(
     {
-      followed_user_id: followUserIdSchema
+      followed_user_id: FollowUserIdSchema
     },
     ['params']
   )

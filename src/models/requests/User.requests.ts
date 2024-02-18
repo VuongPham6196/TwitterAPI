@@ -1,7 +1,7 @@
 import { ParamsDictionary } from 'express-serve-static-core'
 import { JwtPayload } from 'jsonwebtoken'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
-import User from '../schemas/User.schema'
+import { IUser } from '../schemas/User.schema'
 
 export interface RegisterReqBody {
   username: string
@@ -38,7 +38,7 @@ export interface ResetPasswordReqBody {
 }
 
 export type UpdateMeReqBody = Partial<
-  Pick<User, 'name' | 'bio' | 'username' | 'website' | 'avatar' | 'cover_photo' | 'date_of_birth' | 'location'>
+  Pick<IUser, 'name' | 'bio' | 'username' | 'website' | 'avatar' | 'cover_photo' | 'date_of_birth' | 'location'>
 >
 export interface FollowReqBody {
   followed_user_id: string

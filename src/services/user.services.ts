@@ -1,4 +1,4 @@
-import User, { UserType } from '~/models/schemas/User.schema'
+import User, { IUser } from '~/models/schemas/User.schema'
 import databaseServices from './database.services'
 import { RegisterReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
 import { hashPassword } from '~/utils/crypto'
@@ -42,7 +42,7 @@ type OAuthRespone = {
   verify: UserVerifyStatus
 }
 
-class UsersServices {
+class UserServices {
   private signAccessToken({ user_id, verify }: signTokenProps) {
     return signToken({
       payload: { user_id, token_type: TokenType.AccessToken, verify },
@@ -265,7 +265,7 @@ class UsersServices {
       { _id: new ObjectId(user_id) },
       {
         projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } as Partial<
-          Record<keyof UserType, number>
+          Record<keyof IUser, number>
         >
       }
     )
@@ -277,7 +277,7 @@ class UsersServices {
       { _id: new ObjectId(user_id) },
       {
         projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } as Partial<
-          Record<keyof UserType, number>
+          Record<keyof IUser, number>
         >
       }
     )
@@ -348,6 +348,6 @@ class UsersServices {
   }
 }
 
-const usersServices = new UsersServices()
+const userServices = new UserServices()
 
-export default usersServices
+export default userServices

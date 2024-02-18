@@ -10,7 +10,7 @@ import { getNameFromFullName, uploadHLSVideoHandler, uploadImageHandler, uploadV
 
 config()
 
-class MediasServices {
+class MediaServices {
   async uploadImageHandler(req: Request) {
     const files = await uploadImageHandler(req)
     const result: Media[] = await Promise.all(
@@ -59,6 +59,6 @@ class MediasServices {
   }
 }
 
-const mediasServices = new MediasServices()
+const mediaServices = new MediaServices()
 
-export default mediasServices
+export default mediaServices

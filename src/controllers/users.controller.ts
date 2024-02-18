@@ -15,7 +15,7 @@ import {
   RefreshTokenReqBody
 } from '~/models/requests/User.requests'
 import { ParamsDictionary } from 'express-serve-static-core'
-import usersServices from '~/services/users.services'
+import userServices from '~/services/user.services'
 import { USER_MESSAGES } from '~/constants/messages'
 import { ObjectId } from 'mongodb'
 import User from '~/models/schemas/User.schema'
@@ -27,7 +27,7 @@ export const loginController = async (req: Request, res: Response, next: NextFun
   const user = req.user as User
   const _id = user._id as ObjectId
 
-  const result = await usersServices.login({ user_id: _id.toString(), verify: user.verify })
+  const result = await userServices.login({ user_id: _id.toString(), verify: user.verify })
 
   if (!result) {
     return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.LOGIN_FAILED })
@@ -52,7 +52,7 @@ export const refreshTokenController = async (
 ) => {
   const { refresh_token } = req.body
   const { user_id, verify, exp } = req.decoded_refresh_token as TokenPayload
-  const result = await usersServices.refreshToken({ old_refresh_token: refresh_token, user_id, verify, exp })
+  const result = await userServices.refreshToken({ old_refresh_token: refresh_token, user_id, verify, exp })
   return res.json({
     message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
     result
@@ -64,7 +64,7 @@ export const registerController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const result = await usersServices.registerUser(req.body)
+  const result = await userServices.registerUser(req.body)
   res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.REGISTER_SUCCESSFUL, result })
 }
 
@@ -73,7 +73,7 @@ export const logoutController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const result = await usersServices.logout(req.body.refresh_token)
+  const result = await userServices.logout(req.body.refresh_token)
   res.status(HTTP_STATUS.OK).json(result)
 }
 
@@ -97,7 +97,7 @@ export const verifyEmailController = async (
     return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.ACCOUNT_BANNED })
   }
 
-  const result = await usersServices.verifyEmail({ user_id, verify: UserVerifyStatus.Verified })
+  const result = await userServices.verifyEmail({ user_id, verify: UserVerifyStatus.Verified })
   res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.VERIFY_EMAIL_SUCCESSFUL, result })
 }
 
@@ -111,7 +111,7 @@ export const resendVerifyEmailController = async (req: Request, res: Response, n
   if (user.verify === UserVerifyStatus.Verified) {
     return res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.ALREADY_VERIFIED_EMAIL_BEFORE })
   }
-  const result = await usersServices.resendVerifyEmail({ user_id, verify: UserVerifyStatus.Unverified })
+  const result = await userServices.resendVerifyEmail({ user_id, verify: UserVerifyStatus.Unverified })
   return res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESSFUL, result: result })
 }
 
@@ -121,7 +121,7 @@ export const forgotPasswordController = async (
   next: NextFunction
 ) => {
   const { _id, verify } = req.user as User
-  await usersServices.forgotPassword({ user_id: (_id as ObjectId).toString(), verify })
+  await userServices.forgotPassword({ user_id: (_id as ObjectId).toString(), verify })
   res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD })
 }
 
@@ -144,14 +144,14 @@ export const resetPasswordController = async (
 ) => {
   const { user_id } = req.decoded_forgot_password_token as TokenPayload
 
-  const result = await usersServices.resetPassword(user_id, req.body.password)
+  const result = await userServices.resetPassword(user_id, req.body.password)
   res.status(HTTP_STATUS.OK).json(result)
 }
 
 export const getMeController = async (req: Request, res: Response, next: NextFunction) => {
   const { user_id } = req.decoded_authorization as TokenPayload
 
-  const result = await usersServices.getMe(user_id)
+  const result = await userServices.getMe(user_id)
 
   res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.GET_ME_SUCCESSFUL,
@@ -162,7 +162,7 @@ export const getMeController = async (req: Request, res: Response, next: NextFun
 export const getProfileController = async (req: Request<GetUserProfileParams>, res: Response, next: NextFunction) => {
   const { user_id } = req.params
 
-  const result = await usersServices.getProfile(user_id)
+  const result = await userServices.getProfile(user_id)
 
   res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.GET_PROFILE_SUCCESSFUL,
@@ -177,7 +177,7 @@ export const updateMeController = async (
 ) => {
   const { user_id } = req.decoded_authorization as TokenPayload
 
-  const result = await usersServices.updateMe(user_id, req.body)
+  const result = await userServices.updateMe(user_id, req.body)
 
   res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.UPDATE_ME_SUCCESSFUL,
@@ -204,7 +204,7 @@ export const followController = async (
     })
   }
 
-  const result = await usersServices.follow(user_id, followed_user_id)
+  const result = await userServices.follow(user_id, followed_user_id)
   res.status(HTTP_STATUS.OK).json({
     result
   })
@@ -224,7 +224,7 @@ export const unfollowController = async (req: Request<UnfollowParams>, res: Resp
       message: USER_MESSAGES.ALREADY_UNFOLLOWED
     })
   }
-  const result = await usersServices.unfollow(user_id, followed_user_id)
+  const result = await userServices.unfollow(user_id, followed_user_id)
   res.status(HTTP_STATUS.OK).json({
     result
   })
@@ -237,7 +237,7 @@ export const changePasswordController = async (
 ) => {
   const { user_id } = req.decoded_authorization as TokenPayload
 
-  const result = await usersServices.changePassword(user_id, req.body.newPassword)
+  const result = await userServices.changePassword(user_id, req.body.newPassword)
   res.status(HTTP_STATUS.OK).json({
     result
   })
@@ -245,7 +245,7 @@ export const changePasswordController = async (
 
 export const oauthController = async (req: Request, res: Response, next: NextFunction) => {
   const { code } = req.query
-  const { access_token, refresh_token, newUser, verify } = await usersServices.oauth(code as string)
+  const { access_token, refresh_token, newUser, verify } = await userServices.oauth(code as string)
   const url = `${process.env.CLIENT_REDIRECT_CALLBACK_URI}?access_token=${access_token}&refresh_token=${refresh_token}&new_user=${newUser}&verify=${verify}`
   return res.redirect(url)
 }
