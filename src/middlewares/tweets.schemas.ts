@@ -1,5 +1,5 @@
 import { ParamSchema } from 'express-validator'
-import { isEmpty } from 'lodash'
+import { isEmpty, isString } from 'lodash'
 import { ObjectId } from 'mongodb'
 import { MediaType, TweetAudience, TweetType } from '~/constants/enums'
 import { TWEET_MESSAGE } from '~/constants/messages'
@@ -77,7 +77,9 @@ export const MediaSchema: ParamSchema = {
   custom: {
     options: async (value) => {
       if (
-        value.some((item: any) => typeof item?.url !== 'string' || !enumToNumberArray(MediaType).includes(item?.type))
+        value.some(
+          (item: any) => isEmpty(item?.url) || isString(item?.url) || !enumToNumberArray(MediaType).includes(item?.type)
+        )
       ) {
         throw new Error(TWEET_MESSAGE.MENTIONS_MUST_BE_ARRAY_OF_OBJECTID)
       }
