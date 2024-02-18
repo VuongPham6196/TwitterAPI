@@ -78,10 +78,11 @@ export const MediaSchema: ParamSchema = {
     options: async (value) => {
       if (
         value.some(
-          (item: any) => isEmpty(item?.url) || isString(item?.url) || !enumToNumberArray(MediaType).includes(item?.type)
+          (item: any) =>
+            isEmpty(item?.url) || !isString(item?.url) || !enumToNumberArray(MediaType).includes(item?.type)
         )
       ) {
-        throw new Error(TWEET_MESSAGE.MENTIONS_MUST_BE_ARRAY_OF_OBJECTID)
+        throw new Error(TWEET_MESSAGE.MEDIAS_MUST_BE_ARRAY_OF_MEDIA_OBJECT)
       }
       return true
     }
