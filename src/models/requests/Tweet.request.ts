@@ -1,6 +1,12 @@
-import { ITweet } from '../schemas/Tweet.schema'
+import { TweetAudience, TweetType } from '~/constants/enums'
+import { Media } from '../Others'
 
-export type CreateTweetRequestBody = Pick<
-  ITweet,
-  'audience' | 'content' | 'hastags' | 'mentions' | 'medias' | 'parent_id' | 'type'
->
+export type CreateTweetRequestBody = {
+  type: TweetType
+  parent_id: string
+  content: string
+  audience: TweetAudience
+  hashtags: string[]
+  mentions: string[]
+  medias: Media[]
+}

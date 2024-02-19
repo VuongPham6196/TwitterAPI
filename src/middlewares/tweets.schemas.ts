@@ -17,8 +17,8 @@ export const ContentSchema: ParamSchema = {
   isString: true,
   custom: {
     options: async (value, { req }) => {
-      const { type, hastags, mentions } = req.body as CreateTweetRequestBody
-      if (type !== TweetType.Retweet && isEmpty(hastags) && isEmpty(mentions) && isEmpty(value)) {
+      const { type, hashtags, mentions } = req.body as CreateTweetRequestBody
+      if (type !== TweetType.Retweet && isEmpty(hashtags) && isEmpty(mentions) && isEmpty(value)) {
         throw new Error(TWEET_MESSAGE.CONTENT_IS_REQUIRED)
       }
       return true
@@ -48,12 +48,12 @@ export const AudienceSchema: ParamSchema = {
   }
 }
 
-export const HastagSchema: ParamSchema = {
+export const HashtagSchema: ParamSchema = {
   isArray: true,
   custom: {
     options: async (value) => {
       if (value.some((hastag: any) => typeof hastag !== 'string')) {
-        throw new Error(TWEET_MESSAGE.HASTAGS_MUST_BE_ARRAY_OF_STRING)
+        throw new Error(TWEET_MESSAGE.HASHTAGS_MUST_BE_ARRAY_OF_STRING)
       }
       return true
     }

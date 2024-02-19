@@ -4,16 +4,16 @@ import { TweetAudience, TweetType } from '~/constants/enums'
 
 export interface ITweet {
   _id?: ObjectId
-  user_id: ObjectId
+  user_id: string
   type: TweetType
   audience: TweetAudience
   content: string
-  parent_id: null | ObjectId
-  hastags: ObjectId[]
-  mentions: ObjectId[]
+  parent_id: string | null
+  hashtags: string[]
+  mentions: string[]
   medias: Media[]
-  guest_views: number
-  user_views: number
+  guest_views?: number
+  user_views?: number
   created_at?: Date
   updated_at?: Date
 }
@@ -25,7 +25,7 @@ export class Tweet {
   audience: TweetAudience
   content: string
   parent_id: null | ObjectId
-  hastags: ObjectId[]
+  hashtags: ObjectId[]
   mentions: ObjectId[]
   medias: Media[]
   guest_views: number
@@ -36,17 +36,17 @@ export class Tweet {
   constructor(tweet: ITweet) {
     const date = new Date()
 
-    this.user_id = tweet.user_id
+    this.user_id = new ObjectId(tweet.user_id)
     this.type = tweet.type
     this.audience = tweet.audience
     this.content = tweet.content
-    this.parent_id = tweet.parent_id
-    this.hastags = tweet.hastags
-    this.mentions = tweet.mentions
+    this.parent_id = tweet.parent_id ? new ObjectId(tweet.parent_id) : null
+    this.hashtags = tweet.hashtags.map((item) => new ObjectId(item))
+    this.mentions = tweet.mentions.map((item) => new ObjectId(item))
     this.medias = tweet.medias
-    this.guest_views = tweet.guest_views
-    this.user_views = tweet.user_views
-    this.created_at = tweet.created_at || date
-    this.updated_at = tweet.updated_at || date
+    this.guest_views = tweet.guest_views ?? 0
+    this.user_views = tweet.user_views ?? 0
+    this.created_at = tweet.created_at ?? date
+    this.updated_at = tweet.updated_at ?? date
   }
 }

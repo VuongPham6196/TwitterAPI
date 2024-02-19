@@ -4,7 +4,7 @@ import { validate } from '~/utils/validation'
 import {
   AudienceSchema,
   ContentSchema,
-  HastagSchema,
+  HashtagSchema,
   MediaSchema,
   MentionSchema,
   ParentIdSchema,
@@ -17,7 +17,7 @@ export const createTweetValidator = validate(
       type: TypeSchema,
       parent_id: ParentIdSchema,
       content: ContentSchema,
-      hastags: HastagSchema,
+      hashtags: HashtagSchema,
       mentions: MentionSchema,
       audience: AudienceSchema,
       medias: MediaSchema
