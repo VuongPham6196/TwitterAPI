@@ -67,6 +67,7 @@ usersRouter.post('/refresh-token', refreshTokenValidator, WrapAsync(refreshToken
  * Description: Logout a user
  * Path: /logout
  * Method: POST
+ * Header: {Authorization: Bearer <access_token>}
  * Body: {accessToken: string}
  */
 usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, WrapAsync(logoutController))
@@ -83,6 +84,7 @@ usersRouter.post('/verify-email', verifyEmailTokenValidator, WrapAsync(verifyEma
  * Description: Verify email token
  * Path: /verify-email
  * Method: POST
+ * Header: {Authorization: Bearer <access_token>}
  * Body: {verifyEmailToken: string}
  */
 usersRouter.post('/resend-verify-email', accessTokenValidator, WrapAsync(resendVerifyEmailController))
@@ -119,6 +121,7 @@ usersRouter.post('/reset-password', resetPasswordTokenValidator, WrapAsync(reset
  * Description: Get Me
  * Path: /get-me
  * Method: GET
+ * Header: {Authorization: Bearer <access_token>}
  */
 usersRouter.get('/get-me', accessTokenValidator, WrapAsync(getMeController))
 
@@ -133,6 +136,7 @@ usersRouter.get('/get-profile/:user_id', userIdValidator, WrapAsync(getProfileCo
  * Description: Update Me
  * Path: /update-me
  * Method: PATCH
+ * Header: {Authorization: Bearer <access_token>}
  * Body: {name: string, bio: string, location: string, website: string, avatar: string, cover_photo: string}
  */
 usersRouter.patch(
@@ -157,6 +161,7 @@ usersRouter.patch(
  * Description: Follow
  * Path: /follow
  * Method: POST
+ * Header: {Authorization: Bearer <access_token>}
  * Body: {followed_user_id: string}
  */
 usersRouter.post('/follow', accessTokenValidator, verifiedUserValidator, followValidator, WrapAsync(followController))
@@ -165,6 +170,7 @@ usersRouter.post('/follow', accessTokenValidator, verifiedUserValidator, followV
  * Description: Unfollow
  * Path: /follow:user_id
  * Method: DELETE
+ * Header: {Authorization: Bearer <access_token>}
  * Body: {followed_user_id: string}
  */
 
@@ -180,6 +186,7 @@ usersRouter.delete(
  * Description: Change password
  * Path: /follow:user_id
  * Method: PUT
+ * Header: {Authorization: Bearer <access_token>}
  * Body: {followed_user_id: string}
  */
 

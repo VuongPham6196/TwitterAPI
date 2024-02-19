@@ -7,12 +7,14 @@ import mediasRoute from './routes/medias.routes'
 import { initFolder } from './utils/file'
 import staticRoute from './routes/statics.routes'
 import tweetsRouter from './routes/tweets.routes'
+import bookmarksRouter from './routes/bookmarks.routes'
 
 initFolder()
 
 databaseServices.connect().then(() => {
   databaseServices.indexUsers()
   databaseServices.indexRefreshTokens()
+  databaseServices.indexHashtags()
 })
 const app = express()
 
@@ -24,6 +26,7 @@ app.use(express.json())
 app.use('/users', usersRouter)
 app.use('/medias', mediasRoute)
 app.use('/tweets', tweetsRouter)
+app.use('/bookmarks', bookmarksRouter)
 app.use('/static', staticRoute)
 
 app.use(defaultErrorHandler)

@@ -92,3 +92,10 @@ export const TWEET_MESSAGE = {
   MEDIAS_MUST_BE_ARRAY_OF_MEDIA_OBJECT: 'Medias must be array of media object',
   CREATE_TWEET_SUCCESSFUL: 'Create tweet successful'
 }
+
+export const BOOKMARK_MESSAGE = {
+  INVALID_TWEET_ID: 'Invalid tweet id',
+  BOOKMARK_NOT_EXIST: 'Bookmark not exist',
+  CREATE_BOOKMARK_SUCCESSFUL: 'Create bookmark successful',
+  DELETE_BOOKMARK_SUCCESSFUL: 'Delete bookmark successful'
+}

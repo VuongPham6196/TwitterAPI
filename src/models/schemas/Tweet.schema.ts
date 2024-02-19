@@ -9,7 +9,7 @@ export interface ITweet {
   audience: TweetAudience
   content: string
   parent_id: string | null
-  hashtags: string[]
+  hashtags: ObjectId[]
   mentions: string[]
   medias: Media[]
   guest_views?: number
@@ -41,7 +41,7 @@ export class Tweet {
     this.audience = tweet.audience
     this.content = tweet.content
     this.parent_id = tweet.parent_id ? new ObjectId(tweet.parent_id) : null
-    this.hashtags = tweet.hashtags.map((item) => new ObjectId(item))
+    this.hashtags = tweet.hashtags
     this.mentions = tweet.mentions.map((item) => new ObjectId(item))
     this.medias = tweet.medias
     this.guest_views = tweet.guest_views ?? 0
