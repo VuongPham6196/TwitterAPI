@@ -99,3 +99,10 @@ export const BOOKMARK_MESSAGE = {
   CREATE_BOOKMARK_SUCCESSFUL: 'Create bookmark successful',
   DELETE_BOOKMARK_SUCCESSFUL: 'Delete bookmark successful'
 }
+
+export const LIKE_MESSAGE = {
+  INVALID_TWEET_ID: 'Invalid tweet id',
+  LIKE_NOT_EXIST: 'Like not exist',
+  CREATE_LIKE_SUCCESSFUL: 'Create like successful',
+  DELETE_LIKE_SUCCESSFUL: 'Delete like successful'
+}

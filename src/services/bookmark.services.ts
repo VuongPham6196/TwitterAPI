@@ -23,8 +23,13 @@ class BookmarkServices {
     return bookmarkRes.value
   }
 
-  async deleteBookmark(bookmark_id: string) {
-    await databaseServices.bookmarks.deleteOne({ _id: new ObjectId(bookmark_id) })
+  async deleteBookmark(userId: string, tweetId: string) {
+    const user_id = new ObjectId(userId)
+    const tweet_id = new ObjectId(tweetId)
+    await databaseServices.bookmarks.findOneAndDelete({
+      user_id,
+      tweet_id
+    })
   }
 }
 

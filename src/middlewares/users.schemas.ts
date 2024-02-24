@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
 import { USERNAME_REGEX } from '~/constants/regex'
-import { ChangePasswordReqBody } from '~/models/requests/User.requests'
+import { ChangePasswordReqBody, TokenPayload } from '~/models/requests/User.requests'
 import { ErrorWithStatus } from '~/models/Errors'
 import databaseServices from '~/services/database.services'
 import userServices from '~/services/user.services'
@@ -228,11 +228,12 @@ export const OldPasswordSchema: ParamSchema = {
   notEmpty: { errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED },
   custom: {
     options: async (value, { req }) => {
-      const decoratedReq = req as Request<ParamsDictionary, any, ChangePasswordReqBody>
-      const { decoded_authorization } = decoratedReq
-      const { newPassword } = decoratedReq.body
+      const { decoded_authorization, body } = req as Request<ParamsDictionary, any, ChangePasswordReqBody>
+      const { user_id } = decoded_authorization as TokenPayload
+      const { newPassword } = body
+
       const currentUser = await databaseServices.users.findOne({
-        _id: new ObjectId(decoded_authorization?.user_id)
+        _id: new ObjectId(user_id)
       })
       if (hashPassword(value) != currentUser?.password) {
         throw new Error(USER_MESSAGES.PASSWORD_INCORRECT)

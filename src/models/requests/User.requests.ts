@@ -1,7 +1,11 @@
 import { ParamsDictionary } from 'express-serve-static-core'
 import { JwtPayload } from 'jsonwebtoken'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
-import { IUser } from '../schemas/User.schema'
+import User, { IUser } from '../schemas/User.schema'
+
+export interface LoginRequestBody {
+  user: User
+}
 
 export interface RegisterReqBody {
   username: string
@@ -24,6 +28,7 @@ export interface VerifyEmailReqBody {
 }
 export interface ForgotPassowrdReqBody {
   email: string
+  user: User
 }
 export interface VerifyForgotPassowrdReqBody {
   email: string

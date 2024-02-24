@@ -1,7 +1,7 @@
 import { ParamSchema, checkSchema } from 'express-validator'
 import { validate } from '~/utils/validation'
-import { CreateBookmarkRequestBody, DeleteBookmarkRequestBody } from '~/models/requests/Bookmark.request'
-import { CreateBookmarkTweetIdSchema, DeleteBookmarkIdSchema } from './bookmarks.schema'
+import { CreateBookmarkRequestBody, DeleteBookmarkRequestParams } from '~/models/requests/Bookmark.request'
+import { CreateBookmarkTweetIdSchema, DeleteBookmarkTweetIdSchema } from './bookmarks.schema'
 
 export const createBookmarkValidator = validate(
   checkSchema(
@@ -15,8 +15,8 @@ export const createBookmarkValidator = validate(
 export const deleteBookmarkValidator = validate(
   checkSchema(
     {
-      bookmark_id: DeleteBookmarkIdSchema
-    } as Record<keyof DeleteBookmarkRequestBody, ParamSchema>,
-    ['body']
+      tweet_id: DeleteBookmarkTweetIdSchema
+    } as Record<keyof DeleteBookmarkRequestParams, ParamSchema>,
+    ['params']
   )
 )

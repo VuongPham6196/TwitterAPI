@@ -23,13 +23,12 @@ bookmarksRouter.post(
 
 /**
  * Description: Create a bookmark
- * Path: /
+ * Path: /:tweet_id
  * Method: DELETE
  * Header: {Authorization: Bearer <access_token>}
- * Body: IBookmark
  */
 bookmarksRouter.delete(
-  '/',
+  '/:tweet_id',
   accessTokenValidator,
   verifiedUserValidator,
   deleteBookmarkValidator,
