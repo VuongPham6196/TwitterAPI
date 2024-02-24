@@ -2,9 +2,30 @@ import { ParamSchema } from 'express-validator'
 import { isEmpty, isString } from 'lodash'
 import { ObjectId } from 'mongodb'
 import { MediaType, TweetAudience, TweetType } from '~/constants/enums'
+import HTTP_STATUS from '~/constants/httpStatus'
 import { TWEET_MESSAGE } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Errors'
 import { CreateTweetRequestBody } from '~/models/requests/Tweet.request'
+import databaseServices from '~/services/database.services'
 import { enumToNumberArray } from '~/utils/general'
+
+export const TweetIdSchema: ParamSchema = {
+  custom: {
+    options: async (value) => {
+      if (!ObjectId.isValid(value)) {
+        throw new ErrorWithStatus({
+          status: HTTP_STATUS.NOT_FOUND,
+          message: TWEET_MESSAGE.IVALID_TWEET_ID
+        })
+      }
+      const existingTweet = await databaseServices.tweets.findOne({ _id: new ObjectId(value) })
+      if (!existingTweet) {
+        throw new ErrorWithStatus({ message: TWEET_MESSAGE.TWEET_NOT_FOUND, status: HTTP_STATUS.NOT_FOUND })
+      }
+      return true
+    }
+  }
+}
 
 export const TypeSchema: ParamSchema = {
   isIn: {

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { createLikeController, deleteLikeController } from '~/controllers/likes.controller'
-import { createLikeValidator, deleteLikeValidator } from '~/middlewares/likes.middlewares'
+import { tweetIdValidator } from '~/middlewares/tweets.middlewares'
 import { accessTokenValidator, verifiedUserValidator } from '~/middlewares/users.middlewares'
 import { WrapAsync } from '~/utils/handlers'
 
@@ -13,7 +13,7 @@ const likesRouter = Router()
  * Header: {Authorization: Bearer <access_token>}
  * Body: ILike
  */
-likesRouter.post('/', accessTokenValidator, verifiedUserValidator, createLikeValidator, WrapAsync(createLikeController))
+likesRouter.post('/', accessTokenValidator, verifiedUserValidator, tweetIdValidator, WrapAsync(createLikeController))
 
 /**
  * Description: Create a bookmark
@@ -25,7 +25,7 @@ likesRouter.delete(
   '/:tweet_id',
   accessTokenValidator,
   verifiedUserValidator,
-  deleteLikeValidator,
+  tweetIdValidator,
   WrapAsync(deleteLikeController)
 )
 

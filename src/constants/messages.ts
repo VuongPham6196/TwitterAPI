@@ -90,18 +90,18 @@ export const TWEET_MESSAGE = {
   INVALID_PARENT_ID: 'Invalid parent id',
   PARENT_ID_MUST_BE_NULL: 'Parent id must be null',
   MEDIAS_MUST_BE_ARRAY_OF_MEDIA_OBJECT: 'Medias must be array of media object',
-  CREATE_TWEET_SUCCESSFUL: 'Create tweet successful'
+  CREATE_TWEET_SUCCESSFUL: 'Create tweet successful',
+  IVALID_TWEET_ID: 'Invalid tweet id',
+  TWEET_NOT_FOUND: 'Tweet not found'
 }
 
 export const BOOKMARK_MESSAGE = {
-  INVALID_TWEET_ID: 'Invalid tweet id',
   BOOKMARK_NOT_EXIST: 'Bookmark not exist',
   CREATE_BOOKMARK_SUCCESSFUL: 'Create bookmark successful',
   DELETE_BOOKMARK_SUCCESSFUL: 'Delete bookmark successful'
 }
 
 export const LIKE_MESSAGE = {
-  INVALID_TWEET_ID: 'Invalid tweet id',
   LIKE_NOT_EXIST: 'Like not exist',
   CREATE_LIKE_SUCCESSFUL: 'Create like successful',
   DELETE_LIKE_SUCCESSFUL: 'Delete like successful'
