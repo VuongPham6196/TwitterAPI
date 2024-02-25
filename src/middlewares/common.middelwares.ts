@@ -9,3 +9,12 @@ export const filterUpdateUserMiddleware =
     req.body = pick(req.body, filterKeys)
     next()
   }
+
+export const ifLoggedInValidator = (middlewareres: (req: Request, res: Response, next: NextFunction) => void) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (req.headers.authorization) {
+      return middlewareres(req, res, next)
+    }
+    next()
+  }
+}

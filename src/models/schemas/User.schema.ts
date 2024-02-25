@@ -18,6 +18,7 @@ export interface IUser {
   username: string
   avatar?: string
   cover_photo?: string
+  tweet_circle?: string[]
 }
 
 export default class User {
@@ -37,6 +38,7 @@ export default class User {
   username: string
   avatar: string
   cover_photo: string
+  tweet_circle: ObjectId[]
 
   constructor(user: IUser) {
     const date = new Date()
@@ -57,5 +59,6 @@ export default class User {
     this.username = user.username || ''
     this.avatar = user.avatar || ''
     this.cover_photo = user.cover_photo || ''
+    this.tweet_circle = user.tweet_circle?.map((item) => new ObjectId(item)) || []
   }
 }

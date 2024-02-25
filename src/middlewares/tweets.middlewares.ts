@@ -4,6 +4,7 @@ import { validate } from '~/utils/validation'
 import {
   AudienceSchema,
   ContentSchema,
+  GetTweetDetailsTweetIdSchema,
   HashtagSchema,
   MediaSchema,
   MentionSchema,
@@ -33,5 +34,14 @@ export const tweetIdValidator = validate(
       tweet_id: TweetIdSchema
     },
     ['params', 'body']
+  )
+)
+
+export const getTweetDetailsValidator = validate(
+  checkSchema(
+    {
+      tweet_id: GetTweetDetailsTweetIdSchema
+    },
+    ['params']
   )
 )

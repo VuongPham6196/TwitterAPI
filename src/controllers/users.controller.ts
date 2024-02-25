@@ -86,7 +86,7 @@ export const verifyEmailController = async (
   const user = await databaseServices.users.findOne({ _id: new ObjectId(user_id) })
 
   if (!user) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.USERT_NOT_FOUND })
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.USER_NOT_FOUND })
   }
 
   if (user.verify === UserVerifyStatus.Verified) {
@@ -106,7 +106,7 @@ export const resendVerifyEmailController = async (req: Request, res: Response, n
   const user = await databaseServices.users.findOne({ _id: new ObjectId(user_id) })
 
   if (!user) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.USERT_NOT_FOUND })
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: USER_MESSAGES.USER_NOT_FOUND })
   }
   if (user.verify === UserVerifyStatus.Verified) {
     return res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.ALREADY_VERIFIED_EMAIL_BEFORE })

@@ -286,12 +286,17 @@ class UserServices {
 
   async updateMe(user_id: string, payload: UpdateMeReqBody) {
     //must filter body field for risks such as token
-    const updateData = { ...payload } as Omit<UpdateMeReqBody, 'date_of_birth'> & {
+    const updateData = { ...payload } as Omit<UpdateMeReqBody, 'date_of_birth' | 'tweet_circle'> & {
       date_of_birth?: Date
+      tweet_circle?: ObjectId[]
     }
 
     if (payload.date_of_birth) {
       updateData.date_of_birth = new Date(payload.date_of_birth)
+    }
+
+    if (payload.tweet_circle) {
+      updateData.tweet_circle = payload.tweet_circle.map((item) => new ObjectId(item))
     }
 
     const user = await databaseServices.users.findOneAndUpdate(

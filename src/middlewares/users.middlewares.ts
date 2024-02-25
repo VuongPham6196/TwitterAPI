@@ -19,7 +19,8 @@ import {
   VerifyEmailTokenSchema,
   UserIdSchema,
   FollowUserIdSchema,
-  OldPasswordSchema
+  OldPasswordSchema,
+  TweetCircleSchema
 } from './users.schemas'
 import { UserVerifyStatus } from '~/constants/enums'
 import {
@@ -154,7 +155,8 @@ export const updateMeValidator = validate(
             }
           }
         }
-      })
+      }),
+      tweet_circle: TweetCircleSchema
     } as Record<keyof UpdateMeReqBody, any>,
     ['body']
   )

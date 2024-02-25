@@ -152,7 +152,8 @@ usersRouter.patch(
     'location',
     'name',
     'website',
-    'username'
+    'username',
+    'tweet_circle'
   ]),
   WrapAsync(updateMeController)
 )

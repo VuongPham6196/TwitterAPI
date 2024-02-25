@@ -43,7 +43,7 @@ export const USER_MESSAGES = {
   VERIFY_EMAIL_TOKEN_IS_REQUIRED: 'Verify email token is required',
   VERIFY_EMAIL_TOKEN_IS_INVALID: 'Verify email token is invalid',
   VERIFY_EMAIL_SUCCESSFUL: 'Verify email successful',
-  USERT_NOT_FOUND: 'User not found',
+  USER_NOT_FOUND: 'User not found',
   ALREADY_VERIFIED_EMAIL_BEFORE: 'Already verified email before',
   ACCOUNT_BANNED: 'Account banned',
   NOT_VERIFIED_EMAIL: 'Not verified email',
@@ -65,7 +65,8 @@ export const USER_MESSAGES = {
   ALREADY_FOLLOWED: 'Already followed',
   ALREADY_UNFOLLOWED: 'Already unfollowed',
   CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF: 'Can not follow or unfollow yourself',
-  GMAIL_NOT_VERIFIED: 'Gmail not verified'
+  GMAIL_NOT_VERIFIED: 'Gmail not verified',
+  TWEET_CIRCLE_INVALID: 'Tweet circle invalid'
 } as const
 
 export const UPLOAD_MESSAGE = {
@@ -91,8 +92,10 @@ export const TWEET_MESSAGE = {
   PARENT_ID_MUST_BE_NULL: 'Parent id must be null',
   MEDIAS_MUST_BE_ARRAY_OF_MEDIA_OBJECT: 'Medias must be array of media object',
   CREATE_TWEET_SUCCESSFUL: 'Create tweet successful',
+  GET_TWEET_SUCCESSFUL: 'Get tweet successful',
   IVALID_TWEET_ID: 'Invalid tweet id',
-  TWEET_NOT_FOUND: 'Tweet not found'
+  TWEET_NOT_FOUND: 'Tweet not found',
+  TWEET_IS_PRIVATE: 'Tweet is private'
 }
 
 export const BOOKMARK_MESSAGE = {

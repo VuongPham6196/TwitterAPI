@@ -264,7 +264,7 @@ export const ForgotPasswordEmailSchema: ParamSchema = {
       const user = await databaseServices.users.findOne({ email: value })
       if (!user) {
         throw new ErrorWithStatus({
-          message: USER_MESSAGES.USERT_NOT_FOUND,
+          message: USER_MESSAGES.USER_NOT_FOUND,
           status: HTTP_STATUS.UNAUTHORIZED
         })
       }
@@ -296,7 +296,7 @@ export const ForgotPasswordTokenSchema: ParamSchema = {
         })
         if (!user) {
           throw new ErrorWithStatus({
-            message: USER_MESSAGES.USERT_NOT_FOUND,
+            message: USER_MESSAGES.USER_NOT_FOUND,
             status: HTTP_STATUS.UNAUTHORIZED
           })
         }
@@ -347,6 +347,24 @@ export const FollowUserIdSchema: ParamSchema = {
         throw new ErrorWithStatus({
           message: USER_MESSAGES.CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF,
           status: HTTP_STATUS.UNAUTHORIZED
+        })
+      }
+      return true
+    }
+  }
+}
+
+export const TweetCircleSchema: ParamSchema = {
+  optional: true,
+  isArray: {
+    errorMessage: USER_MESSAGES.TWEET_CIRCLE_INVALID
+  },
+  custom: {
+    options: (value) => {
+      if (value.some((item: any) => !ObjectId.isValid(item))) {
+        throw new ErrorWithStatus({
+          status: HTTP_STATUS.UNAUTHORIZED,
+          message: USER_MESSAGES.TWEET_CIRCLE_INVALID
         })
       }
       return true

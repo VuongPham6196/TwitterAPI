@@ -43,7 +43,10 @@ export interface ResetPasswordReqBody {
 }
 
 export type UpdateMeReqBody = Partial<
-  Pick<IUser, 'name' | 'bio' | 'username' | 'website' | 'avatar' | 'cover_photo' | 'date_of_birth' | 'location'>
+  Pick<
+    IUser,
+    'name' | 'bio' | 'username' | 'website' | 'avatar' | 'cover_photo' | 'date_of_birth' | 'location' | 'tweet_circle'
+  >
 >
 export interface FollowReqBody {
   followed_user_id: string
