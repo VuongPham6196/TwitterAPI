@@ -19,9 +19,25 @@ export const createTweetController = async (
 }
 
 export const getTweetDetailsController = async (req: Request, res: Response, next: NextFunction) => {
-  const { tweet } = req
+  const viewsResult = await tweetServices.increaseView(req.tweet!._id!, req.decoded_authorization?.user_id)
+
   res.json({
     message: TWEET_MESSAGE.GET_TWEET_SUCCESSFUL,
-    result: tweet
+    result: { ...req.tweet, ...viewsResult }
+  })
+}
+
+export const getTweetChildrenController = async (req: Request, res: Response, next: NextFunction) => {
+  const { page_number, page_size, tweet_type } = req.query
+
+  const result = await tweetServices.getTweetChildren({
+    parent_id: req.tweet!._id!,
+    page_number: Number(page_number),
+    page_size: Number(page_size),
+    tweet_type: Number(tweet_type)
+  })
+  res.json({
+    message: TWEET_MESSAGE.GET_TWEET_CHILDREN_SUCCESSFUL,
+    result
   })
 }

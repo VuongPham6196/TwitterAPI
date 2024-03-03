@@ -8,10 +8,18 @@ import {
   HashtagSchema,
   MediaSchema,
   MentionSchema,
+  PageNumberSchema,
+  PageSizeSchema,
   ParentIdSchema,
-  TweetIdSchema,
-  TypeSchema
+  TypeSchema,
+  getTweetIdSchemaByAggerate
 } from './tweets.schemas'
+import { AggregateOptions, Document } from 'mongodb'
+
+export type TAggerateProps = {
+  pipeline?: Document[] | undefined
+  options?: AggregateOptions | undefined
+}
 
 export const createTweetValidator = validate(
   checkSchema(
@@ -28,14 +36,15 @@ export const createTweetValidator = validate(
   )
 )
 
-export const tweetIdValidator = validate(
-  checkSchema(
-    {
-      tweet_id: TweetIdSchema
-    },
-    ['params', 'body']
+export const tweetIdValidatorWithAggerate = (props?: TAggerateProps) =>
+  validate(
+    checkSchema(
+      {
+        tweet_id: getTweetIdSchemaByAggerate(props)
+      },
+      ['params', 'body']
+    )
   )
-)
 
 export const getTweetDetailsValidator = validate(
   checkSchema(
@@ -43,5 +52,16 @@ export const getTweetDetailsValidator = validate(
       tweet_id: GetTweetDetailsTweetIdSchema
     },
     ['params']
+  )
+)
+
+export const getTweetChildrenValidator = validate(
+  checkSchema(
+    {
+      tweet_type: TypeSchema,
+      page_number: PageNumberSchema,
+      page_size: PageSizeSchema
+    },
+    ['query']
   )
 )

@@ -7,8 +7,43 @@ import HTTP_STATUS from '~/constants/httpStatus'
 import { TWEET_MESSAGE } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
 import { CreateTweetRequestBody } from '~/models/requests/Tweet.request'
+import { Tweet } from '~/models/schemas/Tweet.schema'
 import databaseServices from '~/services/database.services'
 import { enumToNumberArray } from '~/utils/general'
+import { TAggerateProps } from './tweets.middlewares'
+
+export const getTweetIdSchemaByAggerate = (props?: TAggerateProps): ParamSchema => {
+  const { pipeline = [], options = {} } = props ?? {}
+  return {
+    isMongoId: {
+      errorMessage: TWEET_MESSAGE.IVALID_TWEET_ID
+    },
+    custom: {
+      options: async (value, { req }) => {
+        const existingTweet = await databaseServices.tweets
+          .aggregate<Tweet>(
+            [
+              {
+                $match: {
+                  _id: {
+                    $eq: new ObjectId(value)
+                  }
+                }
+              },
+              ...pipeline
+            ],
+            options
+          )
+          .toArray()
+        if (!existingTweet[0]) {
+          throw new ErrorWithStatus({ message: TWEET_MESSAGE.TWEET_NOT_FOUND, status: HTTP_STATUS.NOT_FOUND })
+        }
+        ;(req as Request).tweet = existingTweet[0]
+        return true
+      }
+    }
+  }
+}
 
 export const TweetIdSchema: ParamSchema = {
   isMongoId: {
@@ -16,11 +51,93 @@ export const TweetIdSchema: ParamSchema = {
   },
   custom: {
     options: async (value, { req }) => {
-      const existingTweet = await databaseServices.tweets.findOne({ _id: new ObjectId(value) })
-      if (!existingTweet) {
+      const existingTweet = await databaseServices.tweets
+        .aggregate<Tweet>([
+          {
+            $match: {
+              _id: {
+                $eq: new ObjectId(value)
+              }
+            }
+          },
+          {
+            $lookup: {
+              from: 'bookmarks',
+              localField: '_id',
+              foreignField: 'tweet_id',
+              as: 'bookmarks'
+            }
+          },
+          {
+            $lookup: {
+              from: 'likes',
+              localField: '_id',
+              foreignField: 'tweet_id',
+              as: 'likes'
+            }
+          },
+          {
+            $lookup: {
+              from: 'tweets',
+              localField: '_id',
+              foreignField: 'parent_id',
+              as: 'tweet_children'
+            }
+          },
+          {
+            $addFields: {
+              bookmarks_coutn: {
+                $size: '$bookmarks'
+              },
+              likes_coutn: {
+                $size: '$likes'
+              },
+              retweet_count: {
+                $size: {
+                  $filter: {
+                    input: '$tweet_children',
+                    as: 'item',
+                    cond: {
+                      $eq: ['$$item.type', 1]
+                    }
+                  }
+                }
+              },
+              comment_count: {
+                $size: {
+                  $filter: {
+                    input: '$tweet_children',
+                    as: 'item',
+                    cond: {
+                      $eq: ['$$item.type', 2]
+                    }
+                  }
+                }
+              },
+              quote_count: {
+                $size: {
+                  $filter: {
+                    input: '$tweet_children',
+                    as: 'item',
+                    cond: {
+                      $eq: ['$$item.type', 3]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            $project: {
+              tweet_children: 0
+            }
+          }
+        ])
+        .toArray()
+      if (!existingTweet[0]) {
         throw new ErrorWithStatus({ message: TWEET_MESSAGE.TWEET_NOT_FOUND, status: HTTP_STATUS.NOT_FOUND })
       }
-      ;(req as Request).tweet = existingTweet
+      ;(req as Request).tweet = existingTweet[0]
       return true
     }
   }
@@ -29,7 +146,31 @@ export const TweetIdSchema: ParamSchema = {
 export const TypeSchema: ParamSchema = {
   isIn: {
     options: [enumToNumberArray(TweetType)],
-    errorMessage: TWEET_MESSAGE.INVALID_TYPE
+    errorMessage: TWEET_MESSAGE.INVALID_TWEET_TYPE
+  }
+}
+
+export const PageNumberSchema: ParamSchema = {
+  isInt: true,
+  custom: {
+    options: (value) => {
+      if (value < 1) {
+        throw new Error(TWEET_MESSAGE.IVALID_PAGE_NUMBER)
+      }
+      return true
+    }
+  }
+}
+
+export const PageSizeSchema: ParamSchema = {
+  isInt: true,
+  custom: {
+    options: (value) => {
+      if (value < 1) {
+        throw new Error(TWEET_MESSAGE.IVALID_PAGE_NUMBER)
+      }
+      return true
+    }
   }
 }
 
@@ -117,7 +258,6 @@ export const GetTweetDetailsTweetIdSchema: ParamSchema = {
     options: async (_, { req }) => {
       const { tweet, decoded_authorization } = req as Request
       const user_id = decoded_authorization?.user_id
-      console.log(user_id)
 
       const author = await databaseServices.users.findOne({ _id: tweet?.user_id })
 

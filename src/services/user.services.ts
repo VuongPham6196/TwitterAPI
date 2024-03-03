@@ -1,4 +1,4 @@
-import User, { IUser } from '~/models/schemas/User.schema'
+import User from '~/models/schemas/User.schema'
 import databaseServices from './database.services'
 import { RegisterReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
 import { hashPassword } from '~/utils/crypto'
@@ -265,7 +265,7 @@ class UserServices {
       { _id: new ObjectId(user_id) },
       {
         projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } as Partial<
-          Record<keyof IUser, number>
+          Record<keyof User, number>
         >
       }
     )
@@ -277,7 +277,7 @@ class UserServices {
       { _id: new ObjectId(user_id) },
       {
         projection: { password: 0, email_verify_token: 0, forgot_password_token: 0 } as Partial<
-          Record<keyof IUser, number>
+          Record<keyof User, number>
         >
       }
     )

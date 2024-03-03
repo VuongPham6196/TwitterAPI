@@ -82,7 +82,7 @@ export const MEDIA_MESSAGE = {
 } as const
 
 export const TWEET_MESSAGE = {
-  INVALID_TYPE: 'Invalid type',
+  INVALID_TWEET_TYPE: 'Invalid tweet type',
   INVALID_AUDIENCE: 'Invalid audience',
   HASHTAGS_MUST_BE_ARRAY_OF_STRING: 'Hashtags must be array of string',
   MENTIONS_MUST_BE_ARRAY_OF_OBJECTID: 'Mentions must be array of ObjectId',
@@ -93,9 +93,12 @@ export const TWEET_MESSAGE = {
   MEDIAS_MUST_BE_ARRAY_OF_MEDIA_OBJECT: 'Medias must be array of media object',
   CREATE_TWEET_SUCCESSFUL: 'Create tweet successful',
   GET_TWEET_SUCCESSFUL: 'Get tweet successful',
+  GET_TWEET_CHILDREN_SUCCESSFUL: 'Get tweet children successful',
   IVALID_TWEET_ID: 'Invalid tweet id',
   TWEET_NOT_FOUND: 'Tweet not found',
-  TWEET_IS_PRIVATE: 'Tweet is private'
+  TWEET_IS_PRIVATE: 'Tweet is private',
+  IVALID_PAGE_NUMBER: 'Page number must be greater than 0',
+  IVALID_PAGE_SIZE: 'Page size must be greater than 0'
 }
 
 export const BOOKMARK_MESSAGE = {
