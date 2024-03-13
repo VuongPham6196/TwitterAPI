@@ -98,7 +98,8 @@ export const TWEET_MESSAGE = {
   TWEET_NOT_FOUND: 'Tweet not found',
   TWEET_IS_PRIVATE: 'Tweet is private',
   IVALID_PAGE_NUMBER: 'Page number must be greater than 0',
-  IVALID_PAGE_SIZE: 'Page size must be greater than 0'
+  IVALID_PAGE_SIZE: 'Page size must be from 1 to 100',
+  GET_NEW_FEEDS_SUCCESSFUL: 'Get new feeds successful'
 }
 
 export const BOOKMARK_MESSAGE = {

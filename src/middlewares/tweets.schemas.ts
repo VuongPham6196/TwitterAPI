@@ -166,7 +166,7 @@ export const PageSizeSchema: ParamSchema = {
   isInt: true,
   custom: {
     options: (value) => {
-      if (value < 1) {
+      if (value < 1 || value > 100) {
         throw new Error(TWEET_MESSAGE.IVALID_PAGE_NUMBER)
       }
       return true

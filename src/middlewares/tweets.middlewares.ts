@@ -17,8 +17,8 @@ import {
 import { AggregateOptions, Document } from 'mongodb'
 
 export type TAggerateProps = {
-  pipeline?: Document[] | undefined
-  options?: AggregateOptions | undefined
+  pipeline?: Document[]
+  options?: AggregateOptions
 }
 
 export const createTweetValidator = validate(
@@ -46,7 +46,7 @@ export const tweetIdValidatorWithAggerate = (props?: TAggerateProps) =>
     )
   )
 
-export const getTweetDetailsValidator = validate(
+export const audienceValidator = validate(
   checkSchema(
     {
       tweet_id: GetTweetDetailsTweetIdSchema
@@ -55,10 +55,18 @@ export const getTweetDetailsValidator = validate(
   )
 )
 
-export const getTweetChildrenValidator = validate(
+export const tweetTypeValidator = validate(
   checkSchema(
     {
-      tweet_type: TypeSchema,
+      tweet_type: TypeSchema
+    },
+    ['query']
+  )
+)
+
+export const paginationValidator = validate(
+  checkSchema(
+    {
       page_number: PageNumberSchema,
       page_size: PageSizeSchema
     },

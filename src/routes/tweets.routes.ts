@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import {
   createTweetController,
+  getNewFeedsController,
   getTweetChildrenController,
   getTweetDetailsController
 } from '~/controllers/tweets.controller'
@@ -8,9 +9,10 @@ import { TweetDetailsAggerate } from '~/middlewares/Aggerate'
 import { ifLoggedInValidator } from '~/middlewares/common.middelwares'
 import {
   createTweetValidator,
-  getTweetChildrenValidator,
-  getTweetDetailsValidator,
-  tweetIdValidatorWithAggerate
+  tweetTypeValidator,
+  audienceValidator,
+  tweetIdValidatorWithAggerate,
+  paginationValidator
 } from '~/middlewares/tweets.middlewares'
 import { accessTokenValidator, verifiedUserValidator } from '~/middlewares/users.middlewares'
 import { WrapAsync } from '~/utils/handlers'
@@ -42,7 +44,7 @@ tweetsRouter.get(
   ifLoggedInValidator(accessTokenValidator),
   ifLoggedInValidator(verifiedUserValidator),
   tweetIdValidatorWithAggerate({ pipeline: TweetDetailsAggerate }),
-  getTweetDetailsValidator,
+  audienceValidator,
   WrapAsync(getTweetDetailsController)
 )
 
@@ -57,8 +59,25 @@ tweetsRouter.get(
   accessTokenValidator,
   verifiedUserValidator,
   tweetIdValidatorWithAggerate(),
-  getTweetChildrenValidator,
+  audienceValidator,
+  tweetTypeValidator,
+  paginationValidator,
   WrapAsync(getTweetChildrenController)
+)
+
+/**
+ * Description: Get new feed
+ * Path: /:tweet_id
+ * Method: GET
+ * Header: {Authorization: Bearer <access_token>}
+ * Query:{page_number: number, page_size: number}
+ */
+tweetsRouter.get(
+  '/',
+  accessTokenValidator,
+  verifiedUserValidator,
+  paginationValidator,
+  WrapAsync(getNewFeedsController)
 )
 
 export default tweetsRouter
