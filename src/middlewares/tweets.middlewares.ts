@@ -8,13 +8,12 @@ import {
   HashtagSchema,
   MediaSchema,
   MentionSchema,
-  PageNumberSchema,
-  PageSizeSchema,
   ParentIdSchema,
   TypeSchema,
   getTweetIdSchemaByAggerate
 } from './tweets.schemas'
 import { AggregateOptions, Document } from 'mongodb'
+import { PageNumberSchema, PageSizeSchema } from './common.schemas'
 
 export type TAggerateProps = {
   pipeline?: Document[]

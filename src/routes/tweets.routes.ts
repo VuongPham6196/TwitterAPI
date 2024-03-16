@@ -5,7 +5,7 @@ import {
   getTweetChildrenController,
   getTweetDetailsController
 } from '~/controllers/tweets.controller'
-import { TweetDetailsAggerate } from '~/middlewares/Aggerate'
+import { TweetDetailsAggerate } from '~/aggerates/tweets.aggerate'
 import { ifLoggedInValidator } from '~/middlewares/common.middelwares'
 import {
   createTweetValidator,

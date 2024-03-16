@@ -2,14 +2,14 @@ import { NextFunction, Request, Response } from 'express'
 import {
   CreateTweetRequestBody,
   ITweetChildrenRequestQuery,
-  ITweetRequestParams,
-  ITweetPaginationRequestQuery
+  ITweetRequestParams
 } from '~/models/requests/Tweet.request'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { TokenPayload } from '~/models/requests/User.requests'
 import tweetServices from '~/services/tweet.services'
 import { TWEET_MESSAGE } from '~/constants/messages'
 import { ObjectId } from 'mongodb'
+import { IPaginationRequestQuery } from '~/models/requests/Common.request'
 
 export const createTweetController = async (
   req: Request<ParamsDictionary, any, CreateTweetRequestBody>,
@@ -57,7 +57,7 @@ export const getTweetChildrenController = async (
 }
 
 export const getNewFeedsController = async (
-  req: Request<ParamsDictionary, any, any, ITweetPaginationRequestQuery>,
+  req: Request<ParamsDictionary, any, any, IPaginationRequestQuery>,
   res: Response,
   next: NextFunction
 ) => {

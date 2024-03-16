@@ -1,3 +1,8 @@
+export const GENERAL_MESSAGE = {
+  IVALID_PAGE_NUMBER: 'Page number must be greater than 0',
+  IVALID_PAGE_SIZE: 'Page size must be from 1 to 100'
+}
+
 export const USER_MESSAGES = {
   LOGIN_FAILED: 'Login failed',
   LOGIN_SUCCESSFUL: 'Login successful',
@@ -97,8 +102,6 @@ export const TWEET_MESSAGE = {
   IVALID_TWEET_ID: 'Invalid tweet id',
   TWEET_NOT_FOUND: 'Tweet not found',
   TWEET_IS_PRIVATE: 'Tweet is private',
-  IVALID_PAGE_NUMBER: 'Page number must be greater than 0',
-  IVALID_PAGE_SIZE: 'Page size must be from 1 to 100',
   GET_NEW_FEEDS_SUCCESSFUL: 'Get new feeds successful'
 }
 
@@ -112,4 +115,8 @@ export const LIKE_MESSAGE = {
   LIKE_NOT_EXIST: 'Like not exist',
   CREATE_LIKE_SUCCESSFUL: 'Create like successful',
   DELETE_LIKE_SUCCESSFUL: 'Delete like successful'
+}
+
+export const SEARCH_MESSAGE = {
+  SEARCH_SUCCESSFUL: 'Search successful'
 }
