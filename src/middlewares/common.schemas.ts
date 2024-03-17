@@ -6,7 +6,7 @@ export const PageNumberSchema: ParamSchema = {
   custom: {
     options: (value) => {
       if (value < 1) {
-        throw new Error(GENERAL_MESSAGE.IVALID_PAGE_NUMBER)
+        throw new Error(GENERAL_MESSAGE.INVALID_PAGE_NUMBER)
       }
       return true
     }
@@ -18,7 +18,7 @@ export const PageSizeSchema: ParamSchema = {
   custom: {
     options: (value) => {
       if (value < 1 || value > 100) {
-        throw new Error(GENERAL_MESSAGE.IVALID_PAGE_NUMBER)
+        throw new Error(GENERAL_MESSAGE.INVALID_PAGE_NUMBER)
       }
       return true
     }

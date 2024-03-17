@@ -1,5 +1,5 @@
 import { ParamSchema } from 'express-validator'
-import { isNumber } from 'lodash'
+import { isNumber, isString } from 'lodash'
 
 type generalStringSchema = {
   fieldName?: string
@@ -18,6 +18,7 @@ export const generalStringSchema = ({
 }: generalStringSchema): ParamSchema => {
   const schema: ParamSchema = {
     optional: !required,
+    trim: true,
     isString: {
       errorMessage: `${fieldName} must be string!`
     },
@@ -32,8 +33,7 @@ export const generalStringSchema = ({
         max: maxLength
       },
       errorMessage: `${fieldName} must be from ${minLength} to ${maxLength} characters!`
-    },
-    trim: true
+    }
   }
 
   return { ...schema, ...additionalSchema }
@@ -41,4 +41,8 @@ export const generalStringSchema = ({
 
 export const enumToNumberArray = (input: { [key: string]: string | number }) => {
   return Object.values(input).filter(isNumber)
+}
+
+export const enumToStringArray = (input: { [key: string]: string | number }) => {
+  return Object.values(input).filter(isString)
 }

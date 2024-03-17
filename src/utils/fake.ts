@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { ObjectId } from 'mongodb'
 import User from '~/models/schemas/User.schema'
 import { hashPassword } from './crypto'
-import { TweetAudience, TweetType, UserVerifyStatus } from '~/constants/enums'
+import { MediaType, TweetAudience, TweetType, UserVerifyStatus } from '~/constants/enums'
 import { RegisterReqBody } from '~/models/requests/User.requests'
 import { CreateTweetRequestBody } from '~/models/requests/Tweet.request'
 import databaseServices from '~/services/database.services'
@@ -31,7 +31,15 @@ export function createRandomTweet() {
     audience: TweetAudience.Everyone,
     content: faker.lorem.paragraph({ min: 10, max: 160 }),
     hashtags: [],
-    medias: [],
+    medias: [
+      {
+        type: Math.random().toFixed() === '1' ? MediaType.Video : MediaType.Image,
+        url:
+          Math.random().toFixed() === '1'
+            ? 'https://www.youtube.com/watch?v=xRL2BspFnOs&list=RDMMF9SiLkScImM&index=11'
+            : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fletsenhance.io%2F&psig=AOvVaw2ZFvKPsBcKzZOPqckKzTiv&ust=1710744186514000&source=images&cd=vfe&opi=89978449&ved=0CBMQjRxqFwoTCLjgufnY-oQDFQAAAAAdAAAAABAE'
+      }
+    ],
     mentions: [],
     parent_id: null
   }

@@ -10,13 +10,15 @@ export const searchController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { page_number, page_size, content } = req.query
+  const { page_number, page_size, content, media_type, people_follow } = req.query
 
   const result = await searchServices.search({
     user_id: new ObjectId(req.decoded_authorization?.user_id),
     page_number: Number(page_number),
     page_size: Number(page_size),
-    content
+    content,
+    media_type,
+    people_follow
   })
 
   res.json({

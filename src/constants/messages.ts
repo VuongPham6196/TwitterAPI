@@ -1,6 +1,8 @@
 export const GENERAL_MESSAGE = {
-  IVALID_PAGE_NUMBER: 'Page number must be greater than 0',
-  IVALID_PAGE_SIZE: 'Page size must be from 1 to 100'
+  INVALID_PAGE_NUMBER: 'Page number must be greater than 0',
+  INVALID_PAGE_SIZE: 'Page size must be from 1 to 100',
+  INVALID_MEDIA_TYPE: 'Invalid media type',
+  INVALID_PEOPLE_FOLOLW: 'Invalid people follow'
 }
 
 export const USER_MESSAGES = {
@@ -71,7 +73,9 @@ export const USER_MESSAGES = {
   ALREADY_UNFOLLOWED: 'Already unfollowed',
   CANNOT_FOLLOW_OR_UNFOLLOW_YOURSELF: 'Can not follow or unfollow yourself',
   GMAIL_NOT_VERIFIED: 'Gmail not verified',
-  TWEET_CIRCLE_INVALID: 'Tweet circle invalid'
+  TWEET_CIRCLE_INVALID: 'Tweet circle invalid',
+  GET_FOLLOWED_USERS_SUCCESSFUL: 'Get followed users successful',
+  GET_FOLLOWER_USERS_SUCCESSFUL: 'Get follower users successful'
 } as const
 
 export const UPLOAD_MESSAGE = {

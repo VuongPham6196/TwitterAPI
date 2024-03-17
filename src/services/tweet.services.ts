@@ -5,19 +5,17 @@ import databaseServices from './database.services'
 import Hashtag from '~/models/schemas/Hashtag.schema'
 import { ObjectId } from 'mongodb'
 import { TweetType } from '~/constants/enums'
-import { getNewFeedsAggerate } from '~/aggerates/tweets.aggerate'
+import { getNewFeedsAggerate, getTweetChildrenAggerate } from '~/aggerates/tweets.aggerate'
+import { IPaginationParams } from '~/models/requests/Common.request'
+import userServices from './user.services'
 
-export interface IGetTweetChildrenProps {
+export interface IGetTweetChildrenProps extends IPaginationParams {
   parent_id: ObjectId
   tweet_type: TweetType
-  page_number: number
-  page_size: number
 }
 
-export interface IGetNewFeedsProps {
+export interface IGetNewFeedsProps extends IPaginationParams {
   user_id: ObjectId
-  page_number: number
-  page_size: number
 }
 
 config()
@@ -93,98 +91,14 @@ class TweetServices {
   }
 
   async getTweetChildren(props: IGetTweetChildrenProps) {
-    const { parent_id, page_number, page_size, tweet_type } = props
+    const { page_number, page_size } = props
+    const aggerate = getTweetChildrenAggerate(props)
+
     const [data, total] = await Promise.all([
-      await databaseServices.tweets
-        .aggregate<Tweet>([
-          {
-            $match: {
-              parent_id: new ObjectId(parent_id),
-              type: tweet_type
-            }
-          },
-          {
-            $skip: (page_number - 1) * page_size
-          },
-          {
-            $limit: page_size
-          },
-          {
-            $lookup: {
-              from: 'bookmarks',
-              localField: '_id',
-              foreignField: 'tweet_id',
-              as: 'bookmarks'
-            }
-          },
-          {
-            $lookup: {
-              from: 'likes',
-              localField: '_id',
-              foreignField: 'tweet_id',
-              as: 'likes'
-            }
-          },
-          {
-            $lookup: {
-              from: 'tweets',
-              localField: '_id',
-              foreignField: 'parent_id',
-              as: 'tweet_children'
-            }
-          },
-          {
-            $addFields: {
-              bookmarks_coutn: {
-                $size: '$bookmarks'
-              },
-              likes_coutn: {
-                $size: '$likes'
-              },
-              retweet_count: {
-                $size: {
-                  $filter: {
-                    input: '$tweet_children',
-                    as: 'item',
-                    cond: {
-                      $eq: ['$$item.type', TweetType.Retweet]
-                    }
-                  }
-                }
-              },
-              comment_count: {
-                $size: {
-                  $filter: {
-                    input: '$tweet_children',
-                    as: 'item',
-                    cond: {
-                      $eq: ['$$item.type', TweetType.Comment]
-                    }
-                  }
-                }
-              },
-              quote_count: {
-                $size: {
-                  $filter: {
-                    input: '$tweet_children',
-                    as: 'item',
-                    cond: {
-                      $eq: ['$$item.type', TweetType.QuoteTweet]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          {
-            $project: {
-              tweet_children: 0
-            }
-          }
-        ])
-        .toArray(),
-      databaseServices.tweets.countDocuments({ parent_id: new ObjectId(parent_id), type: tweet_type })
+      await databaseServices.tweets.aggregate<Tweet>(aggerate).toArray(),
+      databaseServices.tweets.countDocuments(aggerate.at(0))
     ])
+
     const tweetIds = data.map((item) => item._id as ObjectId)
     const updateDate = this.increaseViewForMany(tweetIds)
     data.forEach((tweet) => {
@@ -196,13 +110,18 @@ class TweetServices {
 
   async getNewFeeds(props: IGetNewFeedsProps) {
     const { user_id, page_number, page_size } = props
-    const followedUsers = await databaseServices.follows.find({ user_id: new ObjectId(user_id) }).toArray()
-    const followedUserIds = followedUsers.map((item) => item.followed_user_id)
-    const aggerate = getNewFeedsAggerate({ user_id, followed_user_ids: followedUserIds, page_number, page_size })
+    const followedUserIds = (await userServices.getFollowedUsers(user_id)).result
+
+    const aggerate = getNewFeedsAggerate({
+      user_id,
+      followed_user_ids: followedUserIds,
+      page_number,
+      page_size
+    })
 
     const [data, countData] = await Promise.all([
       databaseServices.tweets.aggregate<Tweet>(aggerate).toArray(),
-      databaseServices.tweets.aggregate(aggerate.slice(0, 4)).toArray()
+      (await databaseServices.tweets.aggregate([...aggerate.slice(0, 4), { $count: 'total' }]).toArray()).at(0)
     ])
 
     const tweetIds = data.map((item) => item._id as ObjectId)
@@ -210,12 +129,13 @@ class TweetServices {
     data.forEach((tweet) => {
       ;(tweet.updated_at = updateDate), tweet.user_views++
     })
+    const total = countData?.total ?? 0
 
     return {
       page_number,
-      total: countData.length,
+      total,
       page_size,
-      total_pages: Math.ceil(countData.length / page_size),
+      total_pages: Math.ceil(total / page_size),
       data
     }
   }

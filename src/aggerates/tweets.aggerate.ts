@@ -1,14 +1,106 @@
 import { Document, ObjectId } from 'mongodb'
 import { TweetType } from '~/constants/enums'
+import { IPaginationParams } from '~/models/requests/Common.request'
+import { IGetTweetChildrenProps } from '~/services/tweet.services'
 
-interface IGetNewFeedsAggerateProps {
+interface IGetNewFeedsAggerateProps extends IPaginationParams {
   user_id: ObjectId
   followed_user_ids: ObjectId[]
-  page_number: number
-  page_size: number
 }
 
 export const TweetDetailsAggerate: Document[] = [
+  {
+    $lookup: {
+      from: 'bookmarks',
+      localField: '_id',
+      foreignField: 'tweet_id',
+      as: 'bookmarks'
+    }
+  },
+  {
+    $lookup: {
+      from: 'likes',
+      localField: '_id',
+      foreignField: 'tweet_id',
+      as: 'likes'
+    }
+  },
+  {
+    $lookup: {
+      from: 'tweets',
+      localField: '_id',
+      foreignField: 'parent_id',
+      as: 'tweet_children'
+    }
+  },
+  {
+    $addFields: {
+      bookmarks_coutn: {
+        $size: '$bookmarks'
+      },
+      likes_coutn: {
+        $size: '$likes'
+      },
+      retweet_count: {
+        $size: {
+          $filter: {
+            input: '$tweet_children',
+            as: 'item',
+            cond: {
+              $eq: ['$$item.type', TweetType.Retweet]
+            }
+          }
+        }
+      },
+      comment_count: {
+        $size: {
+          $filter: {
+            input: '$tweet_children',
+            as: 'item',
+            cond: {
+              $eq: ['$$item.type', TweetType.Comment]
+            }
+          }
+        }
+      },
+      quote_count: {
+        $size: {
+          $filter: {
+            input: '$tweet_children',
+            as: 'item',
+            cond: {
+              $eq: ['$$item.type', TweetType.QuoteTweet]
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    $project: {
+      tweet_children: 0
+    }
+  }
+]
+
+export const getTweetChildrenAggerate = ({
+  parent_id,
+  tweet_type,
+  page_number,
+  page_size
+}: IGetTweetChildrenProps): Document[] => [
+  {
+    $match: {
+      parent_id: new ObjectId(parent_id),
+      type: tweet_type
+    }
+  },
+  {
+    $skip: (page_number - 1) * page_size
+  },
+  {
+    $limit: page_size
+  },
   {
     $lookup: {
       from: 'bookmarks',

@@ -4,34 +4,43 @@ import { ObjectId } from 'mongodb'
 import { Tweet } from '~/models/schemas/Tweet.schema'
 import { getSearchByTweetContentAggerate } from '~/aggerates/search.aggerate'
 import tweetServices from './tweet.services'
+import { IPaginationParams } from '~/models/requests/Common.request'
+import userServices from './user.services'
 
 config()
 
-export interface ISearchParams {
+export interface ISearchParams extends IPaginationParams {
   user_id: ObjectId
   content: string
-  page_size: number
-  page_number: number
+  media_type: string
+  people_follow: string
 }
 
 class SearchSevices {
   async search(params: ISearchParams) {
-    const aggerate = getSearchByTweetContentAggerate(params)
+    const { user_id, people_follow } = params
+    let followedUserIds: ObjectId[] = []
+    if (people_follow === 'true') {
+      followedUserIds = (await userServices.getFollowedUsers(user_id)).result
+    }
+
+    const aggerate = getSearchByTweetContentAggerate({ ...params, followed_user_ids: followedUserIds })
     const [data, countData] = await Promise.all([
       databaseServices.tweets.aggregate<Tweet>(aggerate).toArray(),
-      databaseServices.tweets.aggregate(aggerate.slice(0, 4)).toArray()
+      (await databaseServices.tweets.aggregate([...aggerate.slice(0, 4), { $count: 'total' }]).toArray()).at(0)
     ])
     const ids = data.map((item) => item._id as ObjectId)
     const updateDate = tweetServices.increaseViewForMany(ids)
     data.forEach((tweet) => {
       ;(tweet.updated_at = updateDate), tweet.user_views++
     })
+    const total = countData?.total ?? 0
 
     return {
       page_number: params.page_number,
-      total: countData.length,
+      total,
       page_size: params.page_size,
-      total_pages: Math.ceil(countData.length / params.page_size),
+      total_pages: Math.ceil(total / params.page_size),
       data
     }
   }

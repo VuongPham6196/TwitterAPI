@@ -351,6 +351,18 @@ class UserServices {
 
     return { message: USER_MESSAGES.CHANGE_PASSWORD_SUCCESSFUL }
   }
+
+  async getFollowedUsers(user_id: ObjectId) {
+    const follows = await databaseServices.follows.find<Follow>({ user_id: new ObjectId(user_id) }).toArray()
+    const result = follows.map((item) => item.followed_user_id)
+    return { message: USER_MESSAGES.GET_FOLLOWED_USERS_SUCCESSFUL, result }
+  }
+
+  async getFollowerUsers(user_id: ObjectId) {
+    const follows = await databaseServices.follows.find({ followed_user_id: new ObjectId(user_id) }).toArray()
+    const result = follows.map((item) => item.user_id)
+    return { message: USER_MESSAGES.GET_FOLLOWER_USERS_SUCCESSFUL, result }
+  }
 }
 
 const userServices = new UserServices()
