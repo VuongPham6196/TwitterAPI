@@ -124,3 +124,10 @@ export const LIKE_MESSAGE = {
 export const SEARCH_MESSAGE = {
   SEARCH_SUCCESSFUL: 'Search successful'
 }
+
+export const EMAIL_MESSAGE = {
+  VERIFY_ACCOUNT:
+    'Welcome to our platform! To continue enjoying the best experience with us, we need to verify your account. Please click the button below to complete the verification process. Thank you!',
+  FORGOT_PASSWORD:
+    'Hi there, You are receiving this email because we have received a request to reset the password for your account. If you did not make this request, please ignore this email. To reset your password, please click the button below'
+}

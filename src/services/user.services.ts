@@ -7,12 +7,13 @@ import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import { ObjectId } from 'mongodb'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { config } from 'dotenv'
-import { USER_MESSAGES } from '~/constants/messages'
+import { EMAIL_MESSAGE, USER_MESSAGES } from '~/constants/messages'
 import Follow from '~/models/schemas/Follow.schema'
 import axios from 'axios'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
 import _ from 'lodash'
+import emailService from './email.services'
 
 config()
 
@@ -138,7 +139,13 @@ class UserServices {
       { _id: result.insertedId },
       { $set: { email_verify_token: verify_email_token } }
     )
-    console.log('send token to email: ', verify_email_token)
+    await emailService.sendRegisterVerifyEmail(
+      'Register Verify',
+      payload.email,
+      EMAIL_MESSAGE.VERIFY_ACCOUNT,
+      'Verify',
+      `${process.env.CLIENT_URI}/users/verify-email?token=${verify_email_token}`
+    )
     const data = await this.login({ user_id, verify: UserVerifyStatus.Unverified })
     return data
   }
@@ -215,7 +222,7 @@ class UserServices {
     return this.login({ user_id, verify })
   }
 
-  async resendVerifyEmail({ user_id, verify }: signTokenProps) {
+  async resendVerifyEmail({ user_id, verify, email }: signTokenProps & { email: string }) {
     const verify_email_token = await this.signVerifyEmailToken({ user_id, verify })
     await databaseServices.users.updateOne(
       { _id: new ObjectId(user_id) },
@@ -226,10 +233,16 @@ class UserServices {
         }
       }
     )
-    return { verify_email_token }
+    await emailService.sendRegisterVerifyEmail(
+      'Register Verify',
+      email,
+      EMAIL_MESSAGE.VERIFY_ACCOUNT,
+      'Verify',
+      `${process.env.CLIENT_URI}/users/verify-email?token=${verify_email_token}`
+    )
   }
 
-  async forgotPassword({ user_id, verify }: signTokenProps) {
+  async forgotPassword({ user_id, verify, email }: signTokenProps & { email: string }) {
     const forgot_password_token = await this.signForgotPasswordToken({ user_id, verify })
     await databaseServices.users.updateOne(
       { _id: new ObjectId(user_id) },
@@ -240,11 +253,13 @@ class UserServices {
         }
       }
     )
-    console.log(
-      "Send email to user's email + forgot_password_token:",
-      `http://localhost:3000/user/verify-forgot-passowrd?forgot-passowrd-token=${forgot_password_token}`
+    await emailService.sendRegisterVerifyEmail(
+      'Reset Password',
+      email,
+      EMAIL_MESSAGE.FORGOT_PASSWORD,
+      'Reset Password',
+      `${process.env.CLIENT_URI}/users/reset-password?token=${forgot_password_token}`
     )
-    return { forgot_password_token }
   }
 
   async resetPassword(user_id: string, password: string) {

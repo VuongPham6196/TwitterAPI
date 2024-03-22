@@ -22,6 +22,9 @@ import User from '~/models/schemas/User.schema'
 import HTTP_STATUS from '~/constants/httpStatus'
 import databaseServices from '~/services/database.services'
 import { UserVerifyStatus } from '~/constants/enums'
+import { config } from 'dotenv'
+
+config()
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
   const user = req.user as User
@@ -111,8 +114,12 @@ export const resendVerifyEmailController = async (req: Request, res: Response, n
   if (user.verify === UserVerifyStatus.Verified) {
     return res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.ALREADY_VERIFIED_EMAIL_BEFORE })
   }
-  const result = await userServices.resendVerifyEmail({ user_id, verify: UserVerifyStatus.Unverified })
-  return res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESSFUL, result: result })
+  await userServices.resendVerifyEmail({
+    user_id,
+    verify: UserVerifyStatus.Unverified,
+    email: user.email
+  })
+  return res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESSFUL })
 }
 
 export const forgotPasswordController = async (
@@ -120,8 +127,8 @@ export const forgotPasswordController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { _id, verify } = req.user as User
-  await userServices.forgotPassword({ user_id: (_id as ObjectId).toString(), verify })
+  const { _id, verify, email } = req.user as User
+  await userServices.forgotPassword({ user_id: (_id as ObjectId).toString(), verify, email })
   res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD })
 }
 
