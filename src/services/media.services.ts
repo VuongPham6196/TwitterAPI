@@ -7,27 +7,37 @@ import { MediaType } from '~/constants/enums'
 import { Media } from '~/models/Others'
 import { isProduction } from '~/utils/config'
 import { getNameFromFullName, uploadHLSVideoHandler, uploadImageHandler, uploadVideoHandler } from '~/utils/file'
+import s3Service from './aws-s3.services'
+import fs from 'fs'
 
 config()
 
 class MediaServices {
   async uploadImageHandler(req: Request) {
     const files = await uploadImageHandler(req)
-    const result: Media[] = await Promise.all(
+    const convertedFiles: { name: string; path: string }[] = await Promise.all(
       files.map(async (file) => {
         const newName = getNameFromFullName(file.newFilename) + '.jpg'
         const newPath = path.resolve(UPLOAD_IMAGE_DIR, newName)
         await sharp(file.filepath).jpeg().toFile(path.resolve(newPath))
+        return { name: newName, path: newPath }
+      })
+    )
+    const uploadToS3Result: Media[] = await Promise.all(
+      convertedFiles.map(async (file) => {
+        const s3Result = await s3Service.uploadFile(file.path, file.name, 'image/jpeg')
         return {
-          url: isProduction
-            ? `https://tw-v1/static/images/${newName}`
-            : `http://localhost:${process.env.PORT}/static/images/${newName}`,
+          url: s3Result.Location as string,
           type: MediaType.Image
         }
       })
     )
+    await Promise.all([
+      ...files.map((item) => fs.promises.unlink(item.filepath)),
+      ...convertedFiles.map((item) => fs.promises.unlink(item.path))
+    ])
 
-    return result
+    return uploadToS3Result
   }
 
   async uploadVideoHandler(req: Request) {

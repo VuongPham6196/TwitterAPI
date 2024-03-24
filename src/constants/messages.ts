@@ -1,8 +1,10 @@
-export const GENERAL_MESSAGE = {
+export const SERVER_MESSAGE = {
+  INTERNAL_SERVER_ERROR: 'Interal Server Error'
+}
+
+export const QUERY_PARAMS_MESSAGE = {
   INVALID_PAGE_NUMBER: 'Page number must be greater than 0',
-  INVALID_PAGE_SIZE: 'Page size must be from 1 to 100',
-  INVALID_MEDIA_TYPE: 'Invalid media type',
-  INVALID_PEOPLE_FOLOLW: 'Invalid people follow'
+  INVALID_PAGE_SIZE: 'Page size must be from 1 to 100'
 }
 
 export const USER_MESSAGES = {
@@ -122,7 +124,9 @@ export const LIKE_MESSAGE = {
 }
 
 export const SEARCH_MESSAGE = {
-  SEARCH_SUCCESSFUL: 'Search successful'
+  SEARCH_SUCCESSFUL: 'Search successful',
+  INVALID_PEOPLE_FOLOLW: 'Invalid people follow',
+  INVALID_MEDIA_TYPE: 'Invalid media type'
 }
 
 export const EMAIL_MESSAGE = {

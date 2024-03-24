@@ -13,7 +13,7 @@ import axios from 'axios'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
 import _ from 'lodash'
-import emailService from './email.services'
+import emailService from './aws-ses.services'
 
 config()
 
@@ -258,7 +258,7 @@ class UserServices {
       email,
       EMAIL_MESSAGE.FORGOT_PASSWORD,
       'Reset Password',
-      `${process.env.CLIENT_URI}/users/reset-password?token=${forgot_password_token}`
+      `${process.env.CLIENT_URI}/users/forgot-password?token=${forgot_password_token}`
     )
   }
 

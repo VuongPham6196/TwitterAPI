@@ -113,7 +113,7 @@ usersRouter.post(
  * Description: Reset Password
  * Path: /reset-password
  * Method: POST
- * Body: {token: string, password: string, confirmPassword: string}
+ * Body: {token: string, password: string, confirm_password: string}
  */
 usersRouter.post('/reset-password', resetPasswordTokenValidator, WrapAsync(resetPasswordController))
 

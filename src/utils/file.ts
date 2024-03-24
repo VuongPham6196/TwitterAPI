@@ -4,11 +4,11 @@ import fs from 'fs'
 import { isEmpty } from 'lodash'
 import { UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_DIR } from '~/constants/dir'
 import HTTP_STATUS from '~/constants/httpStatus'
-import { UPLOAD_MESSAGE } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
 import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
 import { encodeHLSWithMultipleVideoStreams } from './video'
+import Constants from '~/constants'
 
 export const initFolder = () => {
   ;[UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_DIR].forEach((dir) => {
@@ -50,15 +50,18 @@ export const uploadImageHandler = async (req: Request) => {
   let cancelUploads = false
   const form = formidable({
     maxFiles: 4,
-    maxFileSize: 10 * 1024 * 1024, //10MB
-    uploadDir: UPLOAD_IMAGE_TEMP_DIR,
+    maxFileSize: Constants.MAXIMUM_IMAGE_UPLOAD_FILE_SIZE,
+    uploadDir: Constants.DIRS.UPLOAD_IMAGE_TEMP_DIR,
     keepExtensions: true,
     filter: function ({ name, mimetype }) {
       const valid = name == 'image' && mimetype && mimetype.includes('image')
       if (!valid) {
         form.emit(
           'error' as any,
-          new ErrorWithStatus({ message: UPLOAD_MESSAGE.INVALID_FILE_TYPE, status: HTTP_STATUS.BAD_REQUEST }) as any
+          new ErrorWithStatus({
+            message: Constants.MESSAGES.UPLOAD_MESSAGE.INVALID_FILE_TYPE,
+            status: HTTP_STATUS.BAD_REQUEST
+          }) as any
         )
         cancelUploads = true
       }
@@ -68,12 +71,15 @@ export const uploadImageHandler = async (req: Request) => {
   try {
     const [_, files] = await form.parse(req)
     if (isEmpty(files)) {
-      throw new ErrorWithStatus({ message: UPLOAD_MESSAGE.FILE_IS_EMPTY, status: HTTP_STATUS.BAD_REQUEST })
+      throw new ErrorWithStatus({
+        message: Constants.MESSAGES.UPLOAD_MESSAGE.FILE_IS_EMPTY,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
     }
     return files.image as File[]
   } catch (err: any) {
     throw new ErrorWithStatus({
-      message: `${UPLOAD_MESSAGE.UPLOAD_FAILED}: ${err.message}`,
+      message: `${Constants.MESSAGES.UPLOAD_MESSAGE.UPLOAD_FAILED}: ${err.message}`,
       status: HTTP_STATUS.BAD_REQUEST
     })
   }
@@ -90,7 +96,10 @@ export const uploadVideoHandler = async (req: Request) => {
       if (!valid) {
         form.emit(
           'error' as any,
-          new ErrorWithStatus({ message: UPLOAD_MESSAGE.INVALID_FILE_TYPE, status: HTTP_STATUS.BAD_REQUEST }) as any
+          new ErrorWithStatus({
+            message: Constants.MESSAGES.UPLOAD_MESSAGE.INVALID_FILE_TYPE,
+            status: HTTP_STATUS.BAD_REQUEST
+          }) as any
         )
         cancelUploads = true
       }
@@ -100,7 +109,10 @@ export const uploadVideoHandler = async (req: Request) => {
   try {
     const [_, files] = await form.parse(req)
     if (isEmpty(files)) {
-      throw new ErrorWithStatus({ message: UPLOAD_MESSAGE.FILE_IS_EMPTY, status: HTTP_STATUS.BAD_REQUEST })
+      throw new ErrorWithStatus({
+        message: Constants.MESSAGES.UPLOAD_MESSAGE.FILE_IS_EMPTY,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
     }
     const videos = files.video as File[]
 
@@ -113,7 +125,7 @@ export const uploadVideoHandler = async (req: Request) => {
     return videos
   } catch (err: any) {
     throw new ErrorWithStatus({
-      message: `${UPLOAD_MESSAGE.UPLOAD_FAILED}: ${err.message}`,
+      message: `${Constants.MESSAGES.UPLOAD_MESSAGE.UPLOAD_FAILED}: ${err.message}`,
       status: HTTP_STATUS.BAD_REQUEST
     })
   }
@@ -133,7 +145,10 @@ export const uploadHLSVideoHandler = async (req: Request) => {
       if (!valid) {
         form.emit(
           'error' as any,
-          new ErrorWithStatus({ message: UPLOAD_MESSAGE.INVALID_FILE_TYPE, status: HTTP_STATUS.BAD_REQUEST }) as any
+          new ErrorWithStatus({
+            message: Constants.MESSAGES.UPLOAD_MESSAGE.INVALID_FILE_TYPE,
+            status: HTTP_STATUS.BAD_REQUEST
+          }) as any
         )
         cancelUploads = true
       }
@@ -143,7 +158,10 @@ export const uploadHLSVideoHandler = async (req: Request) => {
   try {
     const [_, files] = await form.parse(req)
     if (isEmpty(files)) {
-      throw new ErrorWithStatus({ message: UPLOAD_MESSAGE.FILE_IS_EMPTY, status: HTTP_STATUS.BAD_REQUEST })
+      throw new ErrorWithStatus({
+        message: Constants.MESSAGES.UPLOAD_MESSAGE.FILE_IS_EMPTY,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
     }
     const videos = files.video as File[]
 
@@ -157,7 +175,7 @@ export const uploadHLSVideoHandler = async (req: Request) => {
     return videos
   } catch (err: any) {
     throw new ErrorWithStatus({
-      message: `${UPLOAD_MESSAGE.UPLOAD_FAILED}: ${err.message}`,
+      message: `${Constants.MESSAGES.UPLOAD_MESSAGE.UPLOAD_FAILED}: ${err.message}`,
       status: HTTP_STATUS.BAD_REQUEST
     })
   }
