@@ -120,6 +120,7 @@ export const uploadVideoHandler = async (req: Request) => {
       const extension = getExtensionFromFullName(video.originalFilename as string)
       fs.renameSync(video.filepath, video.filepath + '.' + extension)
       video.newFilename = video.newFilename + '.' + extension
+      video.filepath = video.filepath + '.' + extension
     })
 
     return videos

@@ -15,43 +15,42 @@ config()
 class MediaServices {
   async uploadImageHandler(req: Request) {
     const files = await uploadImageHandler(req)
-    const convertedFiles: { name: string; path: string }[] = await Promise.all(
-      files.map(async (file) => {
-        const newName = getNameFromFullName(file.newFilename) + '.jpg'
+
+    const result: Media[] = await Promise.all(
+      files.map(async ({ filepath, newFilename, mimetype }) => {
+        const newName = getNameFromFullName(newFilename) + '.jpg'
         const newPath = path.resolve(UPLOAD_IMAGE_DIR, newName)
-        await sharp(file.filepath).jpeg().toFile(path.resolve(newPath))
-        return { name: newName, path: newPath }
-      })
-    )
-    const uploadToS3Result: Media[] = await Promise.all(
-      convertedFiles.map(async (file) => {
-        const s3Result = await s3Service.uploadFile(file.path, file.name, 'image/jpeg')
+        await sharp(filepath).jpeg().toFile(path.resolve(newPath))
+        const s3Result = await s3Service.uploadFile(newPath, 'images/' + newName, mimetype as string)
+
+        await fs.promises.unlink(filepath)
+        await fs.promises.unlink(newPath)
+
         return {
           url: s3Result.Location as string,
           type: MediaType.Image
         }
       })
     )
-    await Promise.all([
-      ...files.map((item) => fs.promises.unlink(item.filepath)),
-      ...convertedFiles.map((item) => fs.promises.unlink(item.path))
-    ])
 
-    return uploadToS3Result
+    return result
   }
 
   async uploadVideoHandler(req: Request) {
     const files = await uploadVideoHandler(req)
-    const result: Media[] = files.map((file) => {
-      return {
-        url: isProduction
-          ? `https://tw-v1/static/videos/${file.newFilename}`
-          : `http://localhost:${process.env.PORT}/static/videos/${file.newFilename}`,
-        type: MediaType.Video
-      }
-    })
 
-    return result
+    const uploadToS3Result: Media[] = await Promise.all(
+      files.map(async ({ filepath, newFilename, mimetype }) => {
+        const s3Result = await s3Service.uploadFile(filepath, 'videos/' + newFilename, mimetype as string)
+        await fs.promises.unlink(filepath)
+        return {
+          url: s3Result.Location as string,
+          type: MediaType.Video
+        }
+      })
+    )
+
+    return uploadToS3Result
   }
 
   async uploadHLSVideoHandler(req: Request) {
