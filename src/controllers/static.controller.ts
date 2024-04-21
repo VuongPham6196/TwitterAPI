@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import path from 'path'
-import Constants from '~/constants'
+import Constants from '~/constants/constants'
 import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_DIR } from '~/constants/dir'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { ErrorWithStatus } from '~/models/Errors'

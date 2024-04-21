@@ -8,7 +8,7 @@ import { ErrorWithStatus } from '~/models/Errors'
 import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
 import { encodeHLSWithMultipleVideoStreams } from './video'
-import Constants from '~/constants'
+import Constants from '~/constants/constants'
 
 export const initFolder = () => {
   ;[UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_DIR].forEach((dir) => {
@@ -49,7 +49,7 @@ const ItemQueue = new Queue()
 export const uploadImageHandler = async (req: Request) => {
   let cancelUploads = false
   const form = formidable({
-    maxFiles: 4,
+    maxFiles: Constants.MAXIMUM_IMAGE_UPLOAD_FILE_LIMIT,
     maxFileSize: Constants.MAXIMUM_IMAGE_UPLOAD_FILE_SIZE,
     uploadDir: Constants.DIRS.UPLOAD_IMAGE_TEMP_DIR,
     keepExtensions: true,
@@ -69,7 +69,7 @@ export const uploadImageHandler = async (req: Request) => {
     }
   })
   try {
-    const [_, files] = await form.parse(req)
+    const [, files] = await form.parse(req)
     if (isEmpty(files)) {
       throw new ErrorWithStatus({
         message: Constants.MESSAGES.UPLOAD_MESSAGE.FILE_IS_EMPTY,
@@ -88,8 +88,8 @@ export const uploadImageHandler = async (req: Request) => {
 export const uploadVideoHandler = async (req: Request) => {
   let cancelUploads = false
   const form = formidable({
-    maxFiles: 4,
-    maxFileSize: 50 * 1024 * 1024, //50MB
+    maxFiles: Constants.MAXIMUM_VIDEO_UPLOAD_FILE_LIMIT,
+    maxFileSize: Constants.MAXIMUM_VIDEO_UPLOAD_FILE_SIZE,
     uploadDir: UPLOAD_VIDEO_DIR,
     filter: function ({ name, mimetype }) {
       const valid = name == 'video' && mimetype && (mimetype.includes('mp4') || mimetype.includes('quicktime'))
@@ -107,7 +107,7 @@ export const uploadVideoHandler = async (req: Request) => {
     }
   })
   try {
-    const [_, files] = await form.parse(req)
+    const [, files] = await form.parse(req)
     if (isEmpty(files)) {
       throw new ErrorWithStatus({
         message: Constants.MESSAGES.UPLOAD_MESSAGE.FILE_IS_EMPTY,
@@ -157,7 +157,7 @@ export const uploadHLSVideoHandler = async (req: Request) => {
     }
   })
   try {
-    const [_, files] = await form.parse(req)
+    const [, files] = await form.parse(req)
     if (isEmpty(files)) {
       throw new ErrorWithStatus({
         message: Constants.MESSAGES.UPLOAD_MESSAGE.FILE_IS_EMPTY,

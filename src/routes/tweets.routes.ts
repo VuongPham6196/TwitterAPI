@@ -6,13 +6,12 @@ import {
   getTweetDetailsController
 } from '~/controllers/tweets.controller'
 import { TweetDetailsAggerate } from '~/aggerates/tweets.aggerate'
-import { ifLoggedInValidator } from '~/middlewares/common.middelwares'
+import { ifLoggedInValidator, paginationValidator } from '~/middlewares/common.middelwares'
 import {
   createTweetValidator,
   tweetTypeValidator,
   audienceValidator,
-  tweetIdValidatorWithAggerate,
-  paginationValidator
+  tweetIdValidatorWithAggerate
 } from '~/middlewares/tweets.middlewares'
 import { accessTokenValidator, verifiedUserValidator } from '~/middlewares/users.middlewares'
 import { WrapAsync } from '~/utils/handlers'
@@ -24,7 +23,15 @@ const tweetsRouter = Router()
  * Path: /
  * Method: POST
  * Header: {Authorization: Bearer <access_token>}
- * Body: TTweet
+ * Body: {
+          type: TweetType
+          parent_id: string | null
+          content: string
+          audience: TweetAudience
+          hashtags: string[]
+          mentions: string[]
+          medias: Media[]
+        }
  */
 tweetsRouter.post(
   '/',
@@ -38,6 +45,7 @@ tweetsRouter.post(
  * Description: Get tweet details
  * Path: /:tweet_id
  * Method: GET
+ * Params:{tweet_id: string}
  */
 tweetsRouter.get(
   '/:tweet_id',
@@ -52,6 +60,7 @@ tweetsRouter.get(
  * Description: Get tweet children
  * Path: /:tweet_id
  * Method: GET
+ * Params:{tweet_id: string}
  * Query:{tweet_type: TweetType, page_number: number, page_size: number}
  */
 tweetsRouter.get(
@@ -70,6 +79,7 @@ tweetsRouter.get(
  * Path: /:tweet_id
  * Method: GET
  * Header: {Authorization: Bearer <access_token>}
+ * Params:{tweet_id: string}
  * Query:{page_number: number, page_size: number}
  */
 tweetsRouter.get(

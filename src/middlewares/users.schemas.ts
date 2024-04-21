@@ -12,33 +12,39 @@ import userServices from '~/services/user.services'
 import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import { ParamsDictionary } from 'express-serve-static-core'
+import { envConfig } from '~/utils/config'
+
+export const verifyAuthorization = async ({ value, req }: { value: any; req?: Request }) => {
+  try {
+    const token = value.split(' ')[1]
+    if (!token) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.ACCESS_TOKEN_IS_INVALID,
+        status: HTTP_STATUS.UNAUTHORIZED
+      })
+    }
+    const result = await verifyToken({
+      token: token,
+      secretKey: envConfig.JWT_ACCESS_TOKEN_SECRET
+    })
+    if (req) {
+      ;(req as Request).decoded_authorization = result
+    }
+    return true
+  } catch (error) {
+    if (error instanceof JsonWebTokenError) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.ACCESS_TOKEN_IS_INVALID,
+        status: HTTP_STATUS.UNAUTHORIZED
+      })
+    }
+    throw error
+  }
+}
 
 export const AuthorizationSchema: ParamSchema = {
   custom: {
-    options: async (value, { req }) => {
-      try {
-        const token = value.split(' ')[1]
-        if (!token) {
-          throw new ErrorWithStatus({
-            message: USER_MESSAGES.ACCESS_TOKEN_IS_INVALID,
-            status: HTTP_STATUS.UNAUTHORIZED
-          })
-        }
-        const result = await verifyToken({
-          token: token,
-          secretKey: process.env.JWT_ACCESS_TOKEN_SECRET as string
-        })
-        ;(req as Request).decoded_authorization = result
-        return true
-      } catch (error) {
-        if (error instanceof JsonWebTokenError) {
-          throw new ErrorWithStatus({
-            message: USER_MESSAGES.ACCESS_TOKEN_IS_INVALID,
-            status: HTTP_STATUS.UNAUTHORIZED
-          })
-        }
-      }
-    }
+    options: async (value, { req }) => verifyAuthorization({ value, req: req as Request })
   }
 }
 
@@ -49,7 +55,7 @@ export const RefreshTokenSchema: ParamSchema = {
       try {
         const [refresh_token, decoded_refresh_token] = await Promise.all([
           databaseServices.refreshTokens.findOne({ refresh_token: value }),
-          verifyToken({ token: value, secretKey: process.env.JWT_REFRESH_TOKEN_SECRET as string })
+          verifyToken({ token: value, secretKey: envConfig.JWT_REFRESH_TOKEN_SECRET })
         ])
         if (!refresh_token) {
           throw new ErrorWithStatus({
@@ -78,7 +84,7 @@ export const VerifyEmailTokenSchema: ParamSchema = {
       try {
         const decoded_verify_email_token = await verifyToken({
           token: value,
-          secretKey: process.env.JWT_VERIFY_EMAIL_TOKEN_SECRET as string
+          secretKey: envConfig.JWT_VERIFY_EMAIL_TOKEN_SECRET
         })
 
         if (!decoded_verify_email_token) {
@@ -283,7 +289,7 @@ export const ForgotPasswordTokenSchema: ParamSchema = {
       try {
         const decoded_forgot_password_token = await verifyToken({
           token: value,
-          secretKey: process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET as string
+          secretKey: envConfig.JWT_FORGOT_PASSWORD_TOKEN_SECRET
         })
         if (!decoded_forgot_password_token) {
           throw new ErrorWithStatus({

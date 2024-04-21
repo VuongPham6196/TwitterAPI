@@ -127,8 +127,9 @@ usersRouter.get('/get-me', accessTokenValidator, WrapAsync(getMeController))
 
 /**
  * Description: Get user profile
- * Path: /get-profile/:user-id
+ * Path: /get-profile/:user_id
  * Method: GET
+ * Params:{user_id: string}
  */
 usersRouter.get('/get-profile/:user_id', userIdValidator, WrapAsync(getProfileController))
 
@@ -169,10 +170,10 @@ usersRouter.post('/follow', accessTokenValidator, verifiedUserValidator, followV
 
 /**
  * Description: Unfollow
- * Path: /follow:user_id
+ * Path: /follow/:followed_user_id
  * Method: DELETE
  * Header: {Authorization: Bearer <access_token>}
- * Body: {followed_user_id: string}
+ * Params: {followed_user_id: string}
  */
 
 usersRouter.delete(
@@ -185,10 +186,14 @@ usersRouter.delete(
 
 /**
  * Description: Change password
- * Path: /follow:user_id
+ * Path: /change-password
  * Method: PUT
  * Header: {Authorization: Bearer <access_token>}
- * Body: {followed_user_id: string}
+ * Body: {
+    oldPassword: string
+    newPassword: string
+    confirmNewPassword: string
+  }
  */
 
 usersRouter.put(

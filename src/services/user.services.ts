@@ -14,6 +14,7 @@ import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
 import _ from 'lodash'
 import emailService from './aws-ses.services'
+import { envConfig } from '~/utils/config'
 
 config()
 
@@ -47,36 +48,36 @@ class UserServices {
   private signAccessToken({ user_id, verify }: signTokenProps) {
     return signToken({
       payload: { user_id, token_type: TokenType.AccessToken, verify },
-      privateKey: process.env.JWT_ACCESS_TOKEN_SECRET as string,
-      options: { expiresIn: process.env.ACCESS_TOKEN_LIFE }
+      privateKey: envConfig.JWT_ACCESS_TOKEN_SECRET,
+      options: { expiresIn: envConfig.ACCESS_TOKEN_LIFE }
     })
   }
   private signRefreshToken({ user_id, verify, exp }: signTokenProps) {
     if (exp) {
       return signToken({
         payload: { user_id, token_type: TokenType.RefreshToken, verify, exp },
-        privateKey: process.env.JWT_REFRESH_TOKEN_SECRET as string
+        privateKey: envConfig.JWT_REFRESH_TOKEN_SECRET
       })
     }
     return signToken({
       payload: { user_id, token_type: TokenType.RefreshToken, verify },
-      privateKey: process.env.JWT_REFRESH_TOKEN_SECRET as string,
-      options: { expiresIn: process.env.REFRESH_TOKEN_LIFE }
+      privateKey: envConfig.JWT_REFRESH_TOKEN_SECRET,
+      options: { expiresIn: envConfig.REFRESH_TOKEN_LIFE }
     })
   }
   private signVerifyEmailToken({ user_id, verify }: signTokenProps) {
     return signToken({
       payload: { user_id, token_type: TokenType.EmailVerifyToken, verify },
-      privateKey: process.env.JWT_VERIFY_EMAIL_TOKEN_SECRET as string,
-      options: { expiresIn: process.env.VERIFY_EMAIL_TOKEN_LIFE }
+      privateKey: envConfig.JWT_VERIFY_EMAIL_TOKEN_SECRET,
+      options: { expiresIn: envConfig.VERIFY_EMAIL_TOKEN_LIFE }
     })
   }
 
   private signForgotPasswordToken({ user_id, verify }: signTokenProps) {
     return signToken({
       payload: { user_id, token_type: TokenType.ForgotPasswordToken, verify },
-      privateKey: process.env.JWT_FORGOT_PASSWORD_TOKEN_SECRET as string,
-      options: { expiresIn: process.env.FORGOT_PASSWORD_TOKEN_LIFE }
+      privateKey: envConfig.JWT_FORGOT_PASSWORD_TOKEN_SECRET,
+      options: { expiresIn: envConfig.FORGOT_PASSWORD_TOKEN_LIFE }
     })
   }
 
@@ -96,9 +97,9 @@ class UserServices {
   private async getOauthGoogleToken(code: string) {
     const body = {
       code,
-      client_id: process.env.GOOGLE_CLIENT_ID,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      client_id: envConfig.GOOGLE_CLIENT_ID,
+      client_secret: envConfig.GOOGLE_CLIENT_SECRET,
+      redirect_uri: envConfig.GOOGLE_REDIRECT_URI,
       grant_type: 'authorization_code'
     }
     const { data } = await axios.post('https:/oauth2.googleapis.com/token', body, {
@@ -144,7 +145,7 @@ class UserServices {
       payload.email,
       EMAIL_MESSAGE.VERIFY_ACCOUNT,
       'Verify',
-      `${process.env.CLIENT_URI}/users/verify-email?token=${verify_email_token}`
+      `${envConfig.CLIENT_URI}/users/verify-email?token=${verify_email_token}`
     )
     const data = await this.login({ user_id, verify: UserVerifyStatus.Unverified })
     return data
@@ -238,7 +239,7 @@ class UserServices {
       email,
       EMAIL_MESSAGE.VERIFY_ACCOUNT,
       'Verify',
-      `${process.env.CLIENT_URI}/users/verify-email?token=${verify_email_token}`
+      `${envConfig.CLIENT_URI}/users/verify-email?token=${verify_email_token}`
     )
   }
 
@@ -258,7 +259,7 @@ class UserServices {
       email,
       EMAIL_MESSAGE.FORGOT_PASSWORD,
       'Reset Password',
-      `${process.env.CLIENT_URI}/users/forgot-password?token=${forgot_password_token}`
+      `${envConfig.CLIENT_URI}/users/forgot-password?token=${forgot_password_token}`
     )
   }
 

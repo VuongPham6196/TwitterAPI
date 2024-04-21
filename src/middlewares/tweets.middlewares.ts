@@ -13,7 +13,6 @@ import {
   getTweetIdSchemaByAggerate
 } from './tweets.schemas'
 import { AggregateOptions, Document } from 'mongodb'
-import { PageNumberSchema, PageSizeSchema } from './common.schemas'
 
 export type TAggerateProps = {
   pipeline?: Document[]
@@ -58,16 +57,6 @@ export const tweetTypeValidator = validate(
   checkSchema(
     {
       tweet_type: TypeSchema
-    },
-    ['query']
-  )
-)
-
-export const paginationValidator = validate(
-  checkSchema(
-    {
-      page_number: PageNumberSchema,
-      page_size: PageSizeSchema
     },
     ['query']
   )

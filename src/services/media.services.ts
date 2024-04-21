@@ -5,7 +5,7 @@ import sharp from 'sharp'
 import { UPLOAD_IMAGE_DIR } from '~/constants/dir'
 import { MediaType } from '~/constants/enums'
 import { Media } from '~/models/Others'
-import { isProduction } from '~/utils/config'
+import { envConfig, isProduction } from '~/utils/config'
 import { getNameFromFullName, uploadHLSVideoHandler, uploadImageHandler, uploadVideoHandler } from '~/utils/file'
 import s3Service from './aws-s3.services'
 import fs from 'fs'
@@ -59,7 +59,7 @@ class MediaServices {
       return {
         url: isProduction
           ? `https://tw-v1/static/hls-videos/${file.newFilename}`
-          : `http://localhost:${process.env.PORT}/static/hls-videos/${file.newFilename}`,
+          : `http://localhost:${envConfig.PORT}/static/hls-videos/${file.newFilename}`,
         type: MediaType.Video
       }
     })

@@ -11,7 +11,7 @@ const bookmarksRouter = Router()
  * Path: /
  * Method: POST
  * Header: {Authorization: Bearer <access_token>}
- * Body: IBookmark
+ * Body: {tweet_id: string}
  */
 bookmarksRouter.post(
   '/',
@@ -22,10 +22,11 @@ bookmarksRouter.post(
 )
 
 /**
- * Description: Create a bookmark
+ * Description: Delete a bookmark
  * Path: /:tweet_id
  * Method: DELETE
  * Header: {Authorization: Bearer <access_token>}
+ * Params:{tweet_id: string}
  */
 bookmarksRouter.delete(
   '/:tweet_id',

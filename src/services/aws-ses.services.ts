@@ -2,14 +2,15 @@ import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses'
 import { config } from 'dotenv'
 import fs from 'fs'
 import path from 'path'
+import { envConfig } from '~/utils/config'
 
 config()
 
 const sesClient = new SESClient({
-  region: process.env.AWS_REGION as string,
+  region: envConfig.AWS_REGION,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY as string,
-    secretAccessKey: process.env.AWS_SECRET_KEY as string
+    accessKeyId: envConfig.AWS_ACCESS_KEY,
+    secretAccessKey: envConfig.AWS_SECRET_KEY
   }
 })
 
@@ -69,7 +70,7 @@ class EmailService {
         .replace('{{linkTitle}}', linkTitle)
         .replace('{{link}}', verifyUrl),
       title: title,
-      fromAddress: process.env.AWS_REGISTER_EMAIL as string
+      fromAddress: envConfig.AWS_REGISTER_EMAIL
     })
     return sesClient.send(sendEmailCommand)
   }

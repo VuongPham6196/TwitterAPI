@@ -23,6 +23,7 @@ import HTTP_STATUS from '~/constants/httpStatus'
 import databaseServices from '~/services/database.services'
 import { UserVerifyStatus } from '~/constants/enums'
 import { config } from 'dotenv'
+import { envConfig } from '~/utils/config'
 
 config()
 
@@ -253,6 +254,6 @@ export const changePasswordController = async (
 export const oauthController = async (req: Request, res: Response, next: NextFunction) => {
   const { code } = req.query
   const { access_token, refresh_token, newUser, verify } = await userServices.oauth(code as string)
-  const url = `${process.env.CLIENT_REDIRECT_CALLBACK_URI}?access_token=${access_token}&refresh_token=${refresh_token}&new_user=${newUser}&verify=${verify}`
+  const url = `${envConfig.CLIENT_REDIRECT_CALLBACK_URI}?access_token=${access_token}&refresh_token=${refresh_token}&new_user=${newUser}&verify=${verify}`
   return res.redirect(url)
 }

@@ -11,7 +11,7 @@ const likesRouter = Router()
  * Path: /
  * Method: POST
  * Header: {Authorization: Bearer <access_token>}
- * Body: ILike
+ * Body: {tweet_id: string}
  */
 likesRouter.post(
   '/',
@@ -22,10 +22,11 @@ likesRouter.post(
 )
 
 /**
- * Description: Create a bookmark
- * Path: /:like
+ * Description: Delete a like
+ * Path: /:tweet_id
  * Method: DELETE
  * Header: {Authorization: Bearer <access_token>}
+ * Params: {tweet_id: string}
  */
 likesRouter.delete(
   '/:tweet_id',

@@ -1,5 +1,6 @@
-export const SERVER_MESSAGE = {
-  INTERNAL_SERVER_ERROR: 'Interal Server Error'
+export const GENERAL_MESSAGE = {
+  INTERNAL_SERVER_ERROR: 'Interal Server Error',
+  UNAUTHORIZED: 'Unauthorized'
 }
 
 export const QUERY_PARAMS_MESSAGE = {
@@ -134,4 +135,8 @@ export const EMAIL_MESSAGE = {
     'Welcome to our platform! To continue enjoying the best experience with us, we need to verify your account. Please click the button below to complete the verification process. Thank you!',
   FORGOT_PASSWORD:
     'Hi there, You are receiving this email because we have received a request to reset the password for your account. If you did not make this request, please ignore this email. To reset your password, please click the button below'
+}
+
+export const CONVERSATION_MESSAGE = {
+  GET_CONVERSATION_SUCCESSFUL: 'Get conversation successful'
 }

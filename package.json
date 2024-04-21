@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "npx nodemon --development",
+    "dev:prod": "npx nodemon --production",
     "build": "rimraf ./dist && tsc && tsc-alias",
     "start": "node dist/index.js --production",
     "lint": "eslint .",
@@ -62,6 +63,7 @@
     "node-fetch": "^2.6.7",
     "sharp": "^0.33.1",
     "slash": "^5.1.0",
+    "socket.io": "^4.7.5",
     "uuid": "^9.0.1"
   },
   "jest": {

@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
+import { checkSchema } from 'express-validator'
 import { pick } from 'lodash'
+import { validate } from '~/utils/validation'
+import { PageNumberSchema, PageSizeSchema } from './common.schemas'
 
 type FilterKeys<T> = Array<keyof T>
 
@@ -18,3 +21,13 @@ export const ifLoggedInValidator = (middlewareres: (req: Request, res: Response,
     next()
   }
 }
+
+export const paginationValidator = validate(
+  checkSchema(
+    {
+      page_number: PageNumberSchema,
+      page_size: PageSizeSchema
+    },
+    ['query']
+  )
+)

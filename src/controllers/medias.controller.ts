@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import Constants from '~/constants'
+import Constants from '~/constants/constants'
 import mediaServices from '~/services/media.services'
 
 export const uploadImageController = async (req: Request, res: Response, next: NextFunction) => {
