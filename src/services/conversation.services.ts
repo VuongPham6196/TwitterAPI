@@ -1,9 +1,6 @@
-import { config } from 'dotenv'
 import { ObjectId } from 'mongodb'
 import databaseServices from './database.services'
 import Message from '~/models/schemas/Message.schema'
-
-config()
 
 type CreateMessage = { from: string; to: string; content: string; created_at: Date }
 

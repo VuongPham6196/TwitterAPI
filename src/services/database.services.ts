@@ -1,5 +1,4 @@
 import { MongoClient, Db, Collection } from 'mongodb'
-import { config } from 'dotenv'
 import User from '~/models/schemas/User.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import Follow from '~/models/schemas/Follow.schema'
@@ -9,7 +8,6 @@ import Bookmark from '~/models/schemas/Bookmark.schema'
 import Like from '~/models/schemas/Like.schema'
 import Message from '~/models/schemas/Message.schema'
 import { envConfig } from '~/utils/config'
-config()
 
 const uri = `mongodb+srv://${envConfig.DB_USERNAME}:${envConfig.DB_PASSWORD}@v1.b170zpb.mongodb.net/?retryWrites=true&w=majority`
 

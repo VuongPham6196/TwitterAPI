@@ -43,6 +43,7 @@ export const verifyAuthorization = async ({ value, req }: { value: any; req?: Re
 }
 
 export const AuthorizationSchema: ParamSchema = {
+  notEmpty: { errorMessage: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED },
   custom: {
     options: async (value, { req }) => verifyAuthorization({ value, req: req as Request })
   }

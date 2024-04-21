@@ -1,9 +1,6 @@
-import { config } from 'dotenv'
 import { ObjectId } from 'mongodb'
 import databaseServices from './database.services'
 import Like from '~/models/schemas/Like.schema'
-
-config()
 
 class LikeServices {
   async createLike(userId: string, tweetId: string) {

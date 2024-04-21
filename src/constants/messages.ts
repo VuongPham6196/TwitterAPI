@@ -44,6 +44,7 @@ export const USER_MESSAGES = {
   USER_ALREADY_EXISTS: 'User already exists',
   USER_CREATED: 'User created',
   DATE_OF_BIRTH_MUST_BE_ISO_8601: 'Date of birth must be in ISO 8601 format',
+  ACCESS_TOKEN_IS_REQUIRED: 'Access token is required',
   ACCESS_TOKEN_IS_INVALID: 'Access token is invalid',
   LOGOUT_SUCCESSFUL: 'Logout successful',
   REFRESH_TOKEN_IS_REQUIRED: 'Refresh token is required',

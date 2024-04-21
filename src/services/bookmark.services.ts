@@ -1,9 +1,6 @@
-import { config } from 'dotenv'
 import { ObjectId } from 'mongodb'
 import databaseServices from './database.services'
 import Bookmark from '~/models/schemas/Bookmark.schema'
-
-config()
 
 class BookmarkServices {
   async createBookmark(userId: string, tweetId: string) {

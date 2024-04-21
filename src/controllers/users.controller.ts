@@ -22,10 +22,7 @@ import User from '~/models/schemas/User.schema'
 import HTTP_STATUS from '~/constants/httpStatus'
 import databaseServices from '~/services/database.services'
 import { UserVerifyStatus } from '~/constants/enums'
-import { config } from 'dotenv'
 import { envConfig } from '~/utils/config'
-
-config()
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
   const user = req.user as User

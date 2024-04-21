@@ -1,4 +1,3 @@
-import { config } from 'dotenv'
 import { CreateTweetRequestBody } from '~/models/requests/Tweet.request'
 import { Tweet } from '~/models/schemas/Tweet.schema'
 import databaseServices from './database.services'
@@ -17,8 +16,6 @@ export interface IGetTweetChildrenProps extends IPaginationParams {
 export interface IGetNewFeedsProps extends IPaginationParams {
   user_id: ObjectId
 }
-
-config()
 
 class TweetServices {
   async checkAndCreateHashtags(hashtags: string[]) {

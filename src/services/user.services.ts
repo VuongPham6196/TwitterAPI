@@ -6,7 +6,6 @@ import { signToken } from '~/utils/jwt'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import { ObjectId } from 'mongodb'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
-import { config } from 'dotenv'
 import { EMAIL_MESSAGE, USER_MESSAGES } from '~/constants/messages'
 import Follow from '~/models/schemas/Follow.schema'
 import axios from 'axios'
@@ -15,8 +14,6 @@ import HTTP_STATUS from '~/constants/httpStatus'
 import _ from 'lodash'
 import emailService from './aws-ses.services'
 import { envConfig } from '~/utils/config'
-
-config()
 
 interface signTokenProps {
   user_id: string

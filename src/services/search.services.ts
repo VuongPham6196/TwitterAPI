@@ -1,4 +1,3 @@
-import { config } from 'dotenv'
 import databaseServices from './database.services'
 import { ObjectId } from 'mongodb'
 import { Tweet } from '~/models/schemas/Tweet.schema'
@@ -6,8 +5,6 @@ import { getSearchByTweetContentAggerate } from '~/aggerates/search.aggerate'
 import tweetServices from './tweet.services'
 import { IPaginationParams } from '~/models/requests/Common.request'
 import userServices from './user.services'
-
-config()
 
 export interface ISearchParams extends IPaginationParams {
   user_id: ObjectId

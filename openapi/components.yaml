@@ -1,0 +1,131 @@
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginBodySchema:
+      type: object
+      properties:
+        email:
+          type: string
+          example: 'Phamvuong112@gmail.com'
+        password:
+          type: string
+          example: 'Phamvuong@96'
+      required:
+        - 'email'
+        - 'password'
+    LoginSuccessSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Login successful'
+        result:
+          type: object
+          properties:
+            access_token:
+              type: string
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjU3M2Y4ZTg1NDM4M2U1NmJhZDQ4ZjRjIiwidG9rZW5fdHlwZSI6MCwidmVyaWZ5IjoxLCJpYXQiOjE3MTM2NzM4MzQsImV4cCI6MTcxMzY3Mzg2NH0.MPypXXCHu2TCruyoktoQ27V4GllSlG3xaUANrP1IKtc'
+            refresh_token:
+              type: string
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjU3M2Y4ZTg1NDM4M2U1NmJhZDQ4ZjRjIiwidG9rZW5fdHlwZSI6MSwidmVyaWZ5IjoxLCJpYXQiOjE3MTM2NzM4MzQsImV4cCI6MTcyMjMxMzgzNH0.MIelIAJP3r2nUTk9S7N2VZH-pV24YLiCWEZ__rftEvI'
+    GetMeSuccessSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Get me successful'
+        result:
+          type: object
+          properties:
+            _id:
+              type: string
+              example: '6573f8e854383e56bad48f4c'
+            name:
+              type: string
+              example: 'Vuong 2'
+            email:
+              type: string
+              example: 'Phamvuong112@gmail.com'
+            date_of_birth:
+              type: string
+              format: date-time
+              example: '1996-01-06T00:00:00.000Z'
+            created_at:
+              type: string
+              format: date-time
+              example: '2023-12-09T05:19:36.847Z'
+            updated_at:
+              type: string
+              format: date-time
+              example: '2023-12-09T05:48:13.940Z'
+            verify:
+              type: integer
+              example: 1
+            bio:
+              type: string
+              example: 'IT FE'
+            location:
+              type: string
+              example: 'Da Nang'
+            website:
+              type: string
+              example: 'None'
+            username:
+              type: string
+              example: 'Vuong3'
+            avatar:
+              type: string
+              example: ''
+            cover_photo:
+              type: string
+              example: 'photo link ne'
+    ErrorSchema:
+      type: object
+      properties:
+        errors:
+          type: object
+        message:
+          type: string
+
+  requestBodies:
+    LoginBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginBodySchema'
+  responses:
+    LoginSuccess:
+      description: Login successful
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginSuccessSchema'
+    GetMeSuccess:
+      description: Get me successful
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GetMeSuccessSchema'
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSchema'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSchema'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSchema'

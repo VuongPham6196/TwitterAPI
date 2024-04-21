@@ -1,0 +1,32 @@
+tags:
+  - name: Users
+    description: Login, Register, Authentication, ...
+  - name: Tweets
+    description: Tweet CRUD
+
+paths:
+  /users/login:
+    summary: Login
+    post:
+      tags:
+        - 'Users'
+      summary: Login
+      requestBody:
+        $ref: '#/components/requestBodies/LoginBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginSuccess'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /users/get-me:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - 'Users'
+      summary: Get my infomations
+      responses:
+        '200':
+          $ref: '#/components/responses/GetMeSuccess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

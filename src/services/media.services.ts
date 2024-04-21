@@ -1,4 +1,3 @@
-import { config } from 'dotenv'
 import { Request } from 'express'
 import path from 'path'
 import sharp from 'sharp'
@@ -9,8 +8,6 @@ import { envConfig, isProduction } from '~/utils/config'
 import { getNameFromFullName, uploadHLSVideoHandler, uploadImageHandler, uploadVideoHandler } from '~/utils/file'
 import s3Service from './aws-s3.services'
 import fs from 'fs'
-
-config()
 
 class MediaServices {
   async uploadImageHandler(req: Request) {
